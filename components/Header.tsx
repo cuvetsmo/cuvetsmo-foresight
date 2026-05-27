@@ -26,6 +26,12 @@ export function Header() {
             Markets
           </Link>
           <Link
+            href="/resolver"
+            className="text-[var(--color-text-muted)] hover:text-[var(--color-emerald-deep)] transition-colors"
+          >
+            Verifier
+          </Link>
+          <Link
             href="/#how-it-works"
             className="text-[var(--color-text-muted)] hover:text-[var(--color-emerald-deep)] transition-colors"
           >
