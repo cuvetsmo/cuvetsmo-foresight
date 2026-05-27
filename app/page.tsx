@@ -3,7 +3,10 @@ import { EcosystemBar } from "@/components/EcosystemBar";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { MarketCard } from "@/components/MarketCard";
-import { BRAND, DEPLOY } from "@/lib/brand";
+import { AnimatedCounter, FadeInSection } from "@/components/AnimatedCounter";
+import { LiveTickPreview } from "@/components/LiveTickPreview";
+import { MCPTerminal } from "@/components/MCPTerminal";
+import { BRAND } from "@/lib/brand";
 import { listMarkets } from "@/lib/markets";
 import { CATEGORIES } from "@/lib/types";
 
@@ -81,16 +84,22 @@ export default async function LandingPage() {
                   className="mt-14 grid grid-cols-2 sm:grid-cols-4 gap-6 sm:gap-10 animate-fade-up"
                   style={{ animationDelay: "0.2s" }}
                 >
-                  <Stat value={MARKETS.length.toString()} label="markets live" />
-                  <Stat value={CATEGORIES.length.toString()} label="categories" />
+                  <Stat to={MARKETS.length} label="markets live" />
+                  <Stat to={CATEGORIES.length} label="categories" />
                   <Stat
-                    value={"$" + (totalVolume / 1000).toFixed(0) + "k"}
+                    to={totalVolume / 1000}
                     label="volume traded"
                     tone="emerald"
+                    prefix="$"
+                    suffix="k"
+                    decimals={0}
                   />
                   <Stat
-                    value={"$" + (totalOI / 1000).toFixed(0) + "k"}
+                    to={totalOI / 1000}
                     label="open interest"
+                    prefix="$"
+                    suffix="k"
+                    decimals={0}
                   />
                 </div>
               </div>
@@ -99,7 +108,7 @@ export default async function LandingPage() {
                 className="lg:col-span-5 animate-fade-up"
                 style={{ animationDelay: "0.25s" }}
               >
-                <HeroPreviewCard market={hero} />
+                <LiveTickPreview market={hero} />
               </div>
             </div>
           </div>
@@ -274,26 +283,12 @@ export default async function LandingPage() {
               </div>
 
               <div className="lg:col-span-6">
-                <pre className="rounded-2xl bg-[var(--color-text-strong)] text-white border border-[var(--color-border-strong)] p-6 text-[13px] leading-[1.65] overflow-x-auto font-mono">
-{`# Any MCP-aware agent can use the public surface
-$ claude mcp add foresight ${DEPLOY.baseUrl}/mcp
-
-You:  What's moving in the regional politics category?
-Agent: Top by 24h volume from foresight_list_markets:
-
-  • Thailand snap election before Q4 2027
-    YES 42% · $184k volume · 16mo left
-
-  • Indonesia 2029 — Coalition A wins
-    YES 31% · $6k volume · 32mo left
-
-  Want a deeper look at either, or shall I
-  propose a new market in this category?`}
-                </pre>
-                <p className="mt-4 text-xs text-[var(--color-text-muted)] font-mono">
-                  Open spec · public OpenAPI · WebSocket stream · same fees
-                  for bots and humans.
-                </p>
+                <MCPTerminal />
+                <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-[var(--color-text-muted)] font-mono">
+                  <span>$ npm install -g foresight-mcp</span>
+                  <span aria-hidden className="text-[var(--color-text-faint)]">·</span>
+                  <span>open spec · same fees for bots and humans</span>
+                </div>
               </div>
             </div>
           </div>
@@ -388,13 +383,19 @@ Agent: Top by 24h volume from foresight_list_markets:
 }
 
 function Stat({
-  value,
+  to,
   label,
   tone = "default",
+  prefix,
+  suffix,
+  decimals = 0,
 }: {
-  value: string;
+  to: number;
   label: string;
   tone?: "default" | "emerald";
+  prefix?: string;
+  suffix?: string;
+  decimals?: number;
 }) {
   return (
     <div>
@@ -406,7 +407,7 @@ function Stat({
             : "text-[var(--color-text-strong)]")
         }
       >
-        {value}
+        <AnimatedCounter to={to} prefix={prefix} suffix={suffix} decimals={decimals} />
       </div>
       <div className="mt-1 text-[11px] uppercase tracking-[0.18em] text-[var(--color-text-muted)] font-semibold">
         {label}
@@ -444,61 +445,6 @@ function TrustCard({ title, body }: { title: string; body: string }) {
         </h3>
       </div>
       <p className="text-[15px] text-white/70 leading-[1.65]">{body}</p>
-    </div>
-  );
-}
-
-function HeroPreviewCard({ market: m }: { market: import("@/lib/types").Market }) {
-  const yesPct = Math.round(m.yesProbability * 100);
-  return (
-    <div className="bg-[var(--color-bg-card)] border border-[var(--color-border)] rounded-3xl p-6 sm:p-8 shadow-[0_24px_60px_-24px_rgba(15,23,42,0.18)]">
-      <div className="flex items-center justify-between gap-3 mb-5">
-        <span className="badge badge--open">
-          <span className="pulse-dot" aria-hidden />
-          Live
-        </span>
-        <span className="text-[11px] font-mono text-[var(--color-text-faint)]">
-          th-elec-2027
-        </span>
-      </div>
-      <h3 className="text-lg sm:text-xl font-semibold leading-[1.4] tracking-tight text-[var(--color-text-strong)]">
-        {m.question}
-      </h3>
-
-      <div className="mt-6 flex items-end justify-between gap-4">
-        <div>
-          <div className="text-xs uppercase tracking-[0.18em] text-[var(--color-text-faint)] font-semibold">
-            YES probability
-          </div>
-          <div className="mt-1 text-5xl font-bold tabular-nums text-[var(--color-emerald-deep)]">
-            {yesPct}%
-          </div>
-        </div>
-        <div className="text-right">
-          <div className="text-xs uppercase tracking-[0.18em] text-[var(--color-text-faint)] font-semibold">
-            Volume
-          </div>
-          <div className="mt-1 text-2xl font-semibold tabular-nums text-[var(--color-text)]">
-            ${(m.volumeUsd / 1000).toFixed(1)}k
-          </div>
-        </div>
-      </div>
-
-      <div className="mt-6 grid grid-cols-2 gap-3">
-        <button className="btn-yes" type="button" aria-label="Buy YES">
-          <span>Buy YES</span>
-          <span className="font-mono text-sm">{yesPct}¢</span>
-        </button>
-        <button className="btn-no" type="button" aria-label="Buy NO">
-          <span>Buy NO</span>
-          <span className="font-mono text-sm">{100 - yesPct}¢</span>
-        </button>
-      </div>
-
-      <p className="mt-5 pt-5 border-t border-[var(--color-border)] text-xs text-[var(--color-text-faint)] leading-[1.6]">
-        Resolves via Election Commission of Thailand official announcement.
-        Sample data — real-money trading is not yet live.
-      </p>
     </div>
   );
 }
