@@ -70,6 +70,14 @@ export function Footer() {
               </li>
               <li>
                 <Link
+                  href="/resolver"
+                  className="text-white/80 hover:text-[var(--color-emerald-tint)] transition-colors"
+                >
+                  Try the verifier
+                </Link>
+              </li>
+              <li>
+                <Link
                   href="/#trust"
                   className="text-white/80 hover:text-[var(--color-emerald-tint)] transition-colors"
                 >
@@ -106,6 +114,14 @@ export function Footer() {
                   className="text-white/80 hover:text-[var(--color-emerald-tint)] transition-colors"
                 >
                   About
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/brand"
+                  className="text-white/80 hover:text-[var(--color-emerald-tint)] transition-colors"
+                >
+                  Press + brand kit
                 </Link>
               </li>
               <li>
