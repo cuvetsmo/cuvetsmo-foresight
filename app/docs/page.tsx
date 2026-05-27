@@ -114,7 +114,7 @@ const apiSections: ApiSection[] = [
     path: "/api/cross-venue",
     summary: "Find matching markets on Polymarket and Kalshi.",
     description:
-      "By-slug mode resolves a Foresight market then pulls term-derived matches from Polymarket Gamma + Kalshi public APIs. Free-text mode lets you pass an arbitrary query + AND-group keyword sets. Returns exclusiveToForesight: true when neither venue carries the topic — that is a feature, not a bug.",
+      "By-slug mode resolves a Foresight market then pulls term-derived matches from Polymarket Gamma + Kalshi + Manifold Markets public APIs. Free-text mode lets you pass an arbitrary query + AND-group keyword sets. Returns exclusiveToForesight: true when no venue carries the topic — that is a feature, not a bug.",
     example: `# by Foresight slug
 curl '${BASE}/api/cross-venue?slug=anthropic-1m-ctx-2027-q1'
 
@@ -122,15 +122,17 @@ curl '${BASE}/api/cross-venue?slug=anthropic-1m-ctx-2027-q1'
 curl '${BASE}/api/cross-venue?q=BoT%20rate%20cut&terms=bank+thailand&terms=rate+cut'`,
     responseShape: `{
   "query": "string",
-  "polymarket": [{ "title": "string", "url": "string", "yesProbability": 0.18, "volumeUsd": 0 }],
-  "kalshi": [{ "title": "string", "url": "string", "yesProbability": 0.22 }],
+  "polymarket": [{ "question": "string", "url": "string", "yesProbability": 0.18, "volumeUsd": 0 }],
+  "kalshi": [{ "question": "string", "url": "string", "yesProbability": 0.22 }],
+  "manifold": [{ "question": "string", "url": "string", "yesProbability": 0.63, "volumeUsd": 53 }],
   "exclusiveToForesight": false,
   "fetchedMs": 412,
   "note": "string?"
 }`,
     notes: [
-      "Cached at the route level for 1h. Polymarket pagination walks offset 0/100/200; Kalshi handles their 404-with-body quirk.",
+      "Cached at the route level for 1h. Polymarket pagination walks offset 0/100/200; Kalshi handles their 404-with-body quirk; Manifold uses per-query search-markets (higher recall for SEA/AI/climate/vet).",
       "exclusiveToForesight=true is positive social proof — it means the topic is on our venue and no global aggregator lists it.",
+      "Manifold is MIT-licensed; Polymarket + Kalshi are public APIs without official partnership.",
     ],
   },
   {

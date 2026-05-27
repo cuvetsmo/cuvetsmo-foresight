@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
 interface VenueMatch {
-  source: "polymarket" | "kalshi";
+  source: "polymarket" | "kalshi" | "manifold";
   id: string;
   question: string;
   yesProbability?: number;
@@ -18,12 +18,13 @@ interface CrossVenueLookup {
   query: string;
   polymarket: VenueMatch[];
   kalshi: VenueMatch[];
+  manifold: VenueMatch[];
   exclusiveToForesight: boolean;
   fetchedMs: number;
 }
 
 const VENUE_META: Record<
-  "polymarket" | "kalshi",
+  "polymarket" | "kalshi" | "manifold",
   { label: string; brandColor: string; bg: string }
 > = {
   polymarket: {
@@ -35,6 +36,11 @@ const VENUE_META: Record<
     label: "Kalshi",
     brandColor: "#0F7C66",
     bg: "bg-[#ECFDF5] border-[#A7F3D0]",
+  },
+  manifold: {
+    label: "Manifold",
+    brandColor: "#4F46E5",
+    bg: "bg-[#EEF2FF] border-[#C7D2FE]",
   },
 };
 
@@ -167,14 +173,14 @@ export function CrossVenueComparison({
               <div className="mt-4 rounded-2xl border border-dashed border-[var(--color-emerald)]/40 bg-[var(--color-emerald-tint)]/30 p-4">
                 <p className="text-sm leading-[1.55] text-[var(--color-text)]">
                   <span className="font-semibold text-[var(--color-emerald-deep)]">
-                    Not listed on Polymarket or Kalshi.
+                    Not listed on Polymarket, Kalshi, or Manifold.
                   </span>{" "}
                   This is the kind of niche the giants overlook — regional,
                   vertical, or just unfamiliar to a US-and-crypto-focused
                   desk. Polymarket leans intraday / US politics / sports;
-                  Kalshi is US fiat-only. Forecasting marketplace value is
-                  highest where the question literally cannot be priced
-                  elsewhere.
+                  Kalshi is US fiat-only; Manifold is open-community but
+                  thin on SEA/vet. Forecasting marketplace value is highest
+                  where the question literally cannot be priced elsewhere.
                 </p>
               </div>
             ) : (
@@ -207,12 +213,26 @@ export function CrossVenueComparison({
                     bg={VENUE_META[m.source].bg}
                   />
                 ))}
+                {data.manifold.map((m) => (
+                  <VenueRow
+                    key={`mf-${m.id}`}
+                    source={m.source}
+                    label={VENUE_META[m.source].label}
+                    question={m.question}
+                    yes={m.yesProbability}
+                    liquidityUsd={m.liquidityUsd}
+                    volumeUsd={m.volumeUsd}
+                    url={m.url}
+                    brandColor={VENUE_META[m.source].brandColor}
+                    bg={VENUE_META[m.source].bg}
+                  />
+                ))}
               </div>
             )}
 
             <p className="mt-4 text-[11px] text-[var(--color-text-faint)] font-mono">
-              Cross-venue data via public Polymarket Gamma + Kalshi APIs ·
-              cached 1h · no-auth, no-affiliation
+              Cross-venue data via public Polymarket Gamma + Kalshi + Manifold
+              APIs · cached 1h · no-auth, no-affiliation
             </p>
           </motion.div>
         )}
@@ -234,7 +254,7 @@ function VenueRow({
   note,
   accent,
 }: {
-  source: "foresight" | "polymarket" | "kalshi";
+  source: "foresight" | "polymarket" | "kalshi" | "manifold";
   label: string;
   question: string;
   yes?: number;

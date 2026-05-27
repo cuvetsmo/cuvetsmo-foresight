@@ -12,7 +12,7 @@
  */
 
 export interface VenueMatch {
-  source: "polymarket" | "kalshi";
+  source: "polymarket" | "kalshi" | "manifold";
   question: string;
   /** YES probability 0..1, or undefined if the market is multi-outcome and
    *  we can't reduce it to a single yes/no. */
@@ -35,7 +35,12 @@ export interface CrossVenueLookup {
   polymarket: VenueMatch[];
   /** Markets found on Kalshi matching the query. */
   kalshi: VenueMatch[];
-  /** TRUE if both venues return zero matches — supports the
+  /** Markets found on Manifold Markets (MIT-licensed open community
+   *  forecasting platform). Manifold has 100K+ markets including
+   *  many SEA / AI / climate / vet questions the regulated venues
+   *  don't list. */
+  manifold: VenueMatch[];
+  /** TRUE if ALL venues return zero matches — supports the
    *  "you saw it here first" narrative for Foresight-unique content. */
   exclusiveToForesight: boolean;
   /** Server-side timing for the lookup. */
@@ -171,6 +176,72 @@ function kalshiUrl(row: KalshiRow): string {
 }
 
 // ─────────────────────────────────────────────────────────────────
+// Manifold Markets — MIT-licensed open community forecasting platform.
+// Public search-markets endpoint, no auth needed. Manifold's full data
+// is downloadable and explicitly reusable with attribution.
+// Docs: https://docs.manifold.markets/api
+// ─────────────────────────────────────────────────────────────────
+
+interface ManifoldRow {
+  id: string;
+  question: string;
+  url?: string;
+  probability?: number;
+  volume?: number;
+  totalLiquidity?: number;
+  closeTime?: number; // unix ms
+  isResolved?: boolean;
+  outcomeType?: string;
+}
+
+/**
+ * Manifold has per-query search — unlike Polymarket/Kalshi which we
+ * paginate then filter, here we hit the endpoint once per term group.
+ * That gives much higher match recall for our SEA/AI/climate/vet
+ * topics which the giants don't list.
+ */
+async function fetchManifoldFor(
+  termGroups: string[][],
+  limitPerVenue: number,
+): Promise<ManifoldRow[]> {
+  const seen = new Set<string>();
+  const out: ManifoldRow[] = [];
+
+  for (const group of termGroups) {
+    if (group.length === 0) continue;
+    if (out.length >= limitPerVenue * 2) break;
+    const term = group.join(" ");
+    const url = new URL("https://api.manifold.markets/v0/search-markets");
+    url.searchParams.set("term", term);
+    url.searchParams.set("limit", "10");
+    url.searchParams.set("filter", "open");
+    try {
+      const res = await fetch(url.toString(), {
+        next: {
+          revalidate: REVALIDATE_SEC,
+          tags: ["cross-venue:manifold"],
+        },
+      });
+      if (!res.ok) continue;
+      const rows = (await res.json()) as ManifoldRow[];
+      for (const row of rows) {
+        if (!row.id || seen.has(row.id)) continue;
+        if (row.outcomeType && row.outcomeType !== "BINARY") continue;
+        seen.add(row.id);
+        out.push(row);
+      }
+    } catch {
+      // continue with whatever term groups succeeded
+    }
+  }
+  return out;
+}
+
+function manifoldUrl(row: ManifoldRow): string {
+  return row.url ?? `https://manifold.markets/market/${row.id}`;
+}
+
+// ─────────────────────────────────────────────────────────────────
 // Matching
 // ─────────────────────────────────────────────────────────────────
 
@@ -198,9 +269,10 @@ export async function crossVenueLookup({
   limitPerVenue?: number;
 }): Promise<CrossVenueLookup> {
   const t0 = Date.now();
-  const [pmRows, ksRows] = await Promise.all([
+  const [pmRows, ksRows, mfRows] = await Promise.all([
     fetchPolymarketPage(),
     fetchKalshiPage(),
+    fetchManifoldFor(termGroups, limitPerVenue),
   ]);
 
   const polymarketMatches: VenueMatch[] = [];
@@ -244,12 +316,28 @@ export async function crossVenueLookup({
     }
   }
 
+  // Manifold search-markets is already term-scoped per call, so we keep
+  // every row returned (filtered to BINARY in the fetcher), up to limit.
+  const manifoldMatches: VenueMatch[] = mfRows.slice(0, limitPerVenue).map((row) => ({
+    source: "manifold" as const,
+    id: row.id,
+    question: row.question,
+    yesProbability: typeof row.probability === "number" ? row.probability : undefined,
+    liquidityUsd: typeof row.totalLiquidity === "number" ? row.totalLiquidity : undefined,
+    volumeUsd: typeof row.volume === "number" ? row.volume : undefined,
+    closesAt: row.closeTime ? new Date(row.closeTime).toISOString() : undefined,
+    url: manifoldUrl(row),
+  }));
+
   return {
     query,
     polymarket: polymarketMatches,
     kalshi: kalshiMatches,
+    manifold: manifoldMatches,
     exclusiveToForesight:
-      polymarketMatches.length === 0 && kalshiMatches.length === 0,
+      polymarketMatches.length === 0 &&
+      kalshiMatches.length === 0 &&
+      manifoldMatches.length === 0,
     fetchedMs: Date.now() - t0,
   };
 }

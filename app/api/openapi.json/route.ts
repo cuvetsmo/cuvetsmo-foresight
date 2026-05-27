@@ -394,7 +394,7 @@ export async function GET() {
         },
         CrossVenueResult: {
           type: "object",
-          required: ["query", "polymarket", "kalshi", "exclusiveToForesight", "fetchedMs"],
+          required: ["query", "polymarket", "kalshi", "manifold", "exclusiveToForesight", "fetchedMs"],
           properties: {
             query: { type: "string" },
             polymarket: {
@@ -404,6 +404,12 @@ export async function GET() {
             kalshi: {
               type: "array",
               items: { $ref: "#/components/schemas/CrossVenueMatch" },
+            },
+            manifold: {
+              type: "array",
+              items: { $ref: "#/components/schemas/CrossVenueMatch" },
+              description:
+                "Matches from Manifold Markets (MIT-licensed open community forecasting). Per-query search, much higher recall than Polymarket/Kalshi for SEA / AI / climate / vet topics.",
             },
             exclusiveToForesight: { type: "boolean" },
             fetchedMs: { type: "integer", minimum: 0 },

@@ -21,6 +21,16 @@ interface Release {
 const releases: Release[] = [
   {
     date: "2026-05-27",
+    phase: "0.2.9 · open data sources",
+    title: "Manifold Markets joins cross-venue lookup",
+    bullets: [
+      "Manifold Markets (MIT-licensed, 100K+ markets) wired into /api/cross-venue alongside Polymarket + Kalshi. Per-query search gives much higher recall on SEA / AI / climate / vet topics the regulated venues don't list.",
+      "Three open-license providers, three brand-colored rows on every detail page. Three-way exclusiveToForesight check — when none of Polymarket, Kalshi, AND Manifold list a topic, that's the strongest social proof we own the niche.",
+      "OpenAPI schema extended with the manifold[] field. /docs response shape updated. Manifold rows attribute back to manifold.markets per their MIT terms.",
+    ],
+  },
+  {
+    date: "2026-05-27",
     phase: "0.2.8 · DX polish",
     title: "Per-route OGs, /api/proposals public read, a11y fix",
     bullets: [
