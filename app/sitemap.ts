@@ -1,10 +1,11 @@
 import type { MetadataRoute } from "next";
 import { DEPLOY } from "@/lib/brand";
-import { MARKETS } from "@/lib/markets";
+import { listMarkets } from "@/lib/markets";
 
-export default function sitemap(): MetadataRoute.Sitemap {
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const base = DEPLOY.baseUrl;
   const now = new Date();
+  const markets = await listMarkets();
   return [
     {
       url: `${base}/`,
@@ -18,7 +19,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: "daily",
       priority: 0.9,
     },
-    ...MARKETS.map((m) => ({
+    ...markets.map((m) => ({
       url: `${base}/markets/${m.slug}`,
       lastModified: now,
       changeFrequency: "hourly" as const,

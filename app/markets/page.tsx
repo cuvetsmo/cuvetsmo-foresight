@@ -3,8 +3,10 @@ import { EcosystemBar } from "@/components/EcosystemBar";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { MarketCard } from "@/components/MarketCard";
-import { MARKETS } from "@/lib/markets";
+import { listMarkets } from "@/lib/markets";
 import { CATEGORIES, type MarketCategory } from "@/lib/types";
+
+export const revalidate = 60;
 
 export const metadata: Metadata = {
   title: "All markets",
@@ -12,13 +14,8 @@ export const metadata: Metadata = {
     "Browse every Foresight prediction market — SEA politics, climate, vet, crypto, AI, global tech, sports.",
 };
 
-export default function MarketsPage({
-  searchParams,
-}: {
-  searchParams?: Promise<{ category?: string }>;
-}) {
-  // Phase 0: render every market; the chips link via plain anchors so we
-  // get free deep-link + bookmark support without client state.
+export default async function MarketsPage() {
+  const MARKETS = await listMarkets();
   const totalVolume = MARKETS.reduce((sum, m) => sum + m.volumeUsd, 0);
 
   return (
@@ -146,7 +143,7 @@ function CategorySection({
   labelTh: string;
   labelEn: string;
   emoji: string;
-  markets: typeof MARKETS;
+  markets: import("@/lib/types").Market[];
 }) {
   return (
     <div id={id} className="scroll-mt-24">

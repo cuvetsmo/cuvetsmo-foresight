@@ -4,15 +4,19 @@ import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { MarketCard } from "@/components/MarketCard";
 import { BRAND, DEPLOY } from "@/lib/brand";
-import { MARKETS } from "@/lib/markets";
+import { listMarkets } from "@/lib/markets";
 import { CATEGORIES } from "@/lib/types";
 
-export default function LandingPage() {
+export const revalidate = 60;
+
+export default async function LandingPage() {
+  const MARKETS = await listMarkets();
   const totalVolume = MARKETS.reduce((sum, m) => sum + m.volumeUsd, 0);
   const totalOI = MARKETS.reduce((sum, m) => sum + m.openInterestUsd, 0);
   const featured = [...MARKETS]
     .sort((a, b) => b.volumeUsd - a.volumeUsd)
     .slice(0, 6);
+  const hero = MARKETS[0];
 
   return (
     <>
@@ -95,7 +99,7 @@ export default function LandingPage() {
                 className="lg:col-span-5 animate-fade-up"
                 style={{ animationDelay: "0.25s" }}
               >
-                <HeroPreviewCard />
+                <HeroPreviewCard market={hero} />
               </div>
             </div>
           </div>
@@ -444,8 +448,7 @@ function TrustCard({ title, body }: { title: string; body: string }) {
   );
 }
 
-function HeroPreviewCard() {
-  const m = MARKETS[0];
+function HeroPreviewCard({ market: m }: { market: import("@/lib/types").Market }) {
   const yesPct = Math.round(m.yesProbability * 100);
   return (
     <div className="bg-[var(--color-bg-card)] border border-[var(--color-border)] rounded-3xl p-6 sm:p-8 shadow-[0_24px_60px_-24px_rgba(15,23,42,0.18)]">

@@ -5,20 +5,23 @@ import { EcosystemBar } from "@/components/EcosystemBar";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { Sparkline } from "@/components/Sparkline";
-import { MARKETS, getMarketBySlug } from "@/lib/markets";
+import { listMarkets, getMarketBySlug } from "@/lib/markets";
 import { CATEGORIES } from "@/lib/types";
+
+export const revalidate = 60;
 
 interface PageProps {
   params: Promise<{ slug: string }>;
 }
 
 export async function generateStaticParams() {
-  return MARKETS.map((m) => ({ slug: m.slug }));
+  const all = await listMarkets();
+  return all.map((m) => ({ slug: m.slug }));
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { slug } = await params;
-  const m = getMarketBySlug(slug);
+  const m = await getMarketBySlug(slug);
   if (!m) return { title: "Market not found" };
   const yesPct = Math.round(m.yesProbability * 100);
   return {
@@ -29,7 +32,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
 export default async function MarketDetailPage({ params }: PageProps) {
   const { slug } = await params;
-  const market = getMarketBySlug(slug);
+  const market = await getMarketBySlug(slug);
   if (!market) notFound();
 
   const yesPct = Math.round(market.yesProbability * 100);

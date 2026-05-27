@@ -1,200 +1,100 @@
-import type { Market } from "./types";
+import type { Market, MarketCategory } from "./types";
+import { SEED_MARKETS } from "./markets-seed";
+import { getSupabase } from "./supabase";
 
 /**
- * Phase 0 — mock markets across 8 categories.
+ * Markets data layer. Reads from Supabase `public.foresight_markets` when
+ * env is configured, falls back to the seed bundled with the build so the
+ * landing never breaks.
  *
- * Each market is a real proposition we could resolve with public sources.
- * Probabilities + volumes are illustrative — they will become live numbers
- * once the order book + AMM lands. Resolution criteria are intentionally
- * specific so we can demo the "AI-assisted resolver + appeal panel" angle.
+ * All callers are server components in App Router — these functions only
+ * run on the server. Caching follows Next.js' default fetch semantics +
+ * an explicit revalidate hint via `next: { revalidate, tags }`.
  */
-export const MARKETS: Market[] = [
-  {
-    id: "th-elec-2027",
-    slug: "thailand-snap-election-before-q4-2027",
-    question: "ประเทศไทยจะมีการเลือกตั้งทั่วไปก่อน Q4 2027?",
-    questionEn: "Will Thailand hold a general election before Q4 2027?",
-    category: "thai-politics",
-    status: "open",
-    yesProbability: 0.42,
-    volumeUsd: 184_320,
-    openInterestUsd: 62_800,
-    closesAt: "2027-10-01T00:00:00Z",
-    resolutionCriteria:
-      "Resolves YES if the Election Commission of Thailand (ECT) holds a general election with results announced before 2027-10-01. Snap elections count.",
-    resolutionSources: ["ect.go.th", "Royal Thai Government Gazette"],
-    priceHistory: [0.31, 0.33, 0.36, 0.34, 0.38, 0.42, 0.44, 0.42],
-    createdBy: "Foresight",
-    tags: ["election", "thailand", "long-term"],
-  },
-  {
-    id: "btc-200k-2026",
-    slug: "btc-touch-200k-by-eoy-2026",
-    question: "BTC จะแตะ $200K ก่อนสิ้นปี 2026?",
-    questionEn: "Will Bitcoin touch $200,000 USD before 2026-12-31?",
-    category: "crypto",
-    status: "open",
-    yesProbability: 0.28,
-    volumeUsd: 942_180,
-    openInterestUsd: 318_400,
-    closesAt: "2026-12-31T23:59:59Z",
-    resolutionCriteria:
-      "Resolves YES if the Coinbase BTC-USD spot price prints ≥ 200,000 at least once on a 1-minute candle before 2026-12-31 23:59 UTC.",
-    resolutionSources: ["Coinbase Pro", "Kraken (tiebreaker)"],
-    priceHistory: [0.18, 0.21, 0.25, 0.30, 0.27, 0.29, 0.32, 0.28],
-    createdBy: "Foresight",
-    tags: ["bitcoin", "price", "crypto"],
-  },
-  {
-    id: "asf-th-90d",
-    slug: "new-asf-outbreak-thailand-90d",
-    question: "ASF outbreak ใหม่ในฟาร์มหมูไทยภายใน 90 วัน?",
-    questionEn: "New African Swine Fever (ASF) outbreak in a Thai pig farm within 90 days?",
-    category: "thai-vet",
-    status: "open",
-    yesProbability: 0.55,
-    volumeUsd: 18_640,
-    openInterestUsd: 9_220,
-    closesAt: "2026-08-25T00:00:00Z",
-    resolutionCriteria:
-      "Resolves YES if the Department of Livestock Development (DLD) publishes a confirmed ASF case on a commercial Thai pig farm between 2026-05-27 and 2026-08-25.",
-    resolutionSources: ["dld.go.th", "WOAH official disease reports"],
-    priceHistory: [0.62, 0.58, 0.54, 0.52, 0.55, 0.57, 0.56, 0.55],
-    createdBy: "Foresight",
-    tags: ["asf", "biosecurity", "vet"],
-  },
-  {
-    id: "pm25-cnx-q3",
-    slug: "chiangmai-pm25-150-14days-q3",
-    question: "เชียงใหม่จะมี PM2.5 > 150 µg/m³ ติดกัน 14 วันใน Q3 2026?",
-    questionEn: "Chiang Mai PM2.5 > 150 µg/m³ for 14 consecutive days in Q3 2026?",
-    category: "thai-climate",
-    status: "open",
-    yesProbability: 0.18,
-    volumeUsd: 41_280,
-    openInterestUsd: 14_900,
-    closesAt: "2026-09-30T23:59:59Z",
-    resolutionCriteria:
-      "Resolves YES if the Pollution Control Department (PCD) Chiang Mai station records a 14-day rolling window with PM2.5 24h-avg > 150 within 2026-07-01 to 2026-09-30.",
-    resolutionSources: ["air4thai.com", "IQAir cross-check"],
-    priceHistory: [0.22, 0.20, 0.19, 0.17, 0.16, 0.18, 0.19, 0.18],
-    createdBy: "Foresight",
-    tags: ["pm25", "climate", "chiangmai"],
-  },
-  {
-    id: "polymarket-solana",
-    slug: "polymarket-launches-on-solana-q3-2026",
-    question: "Polymarket จะ launch บน Solana ภายใน Q3 2026?",
-    questionEn: "Will Polymarket launch a Solana deployment before 2026-10-01?",
-    category: "crypto",
-    status: "open",
-    yesProbability: 0.12,
-    volumeUsd: 51_800,
-    openInterestUsd: 22_600,
-    closesAt: "2026-10-01T00:00:00Z",
-    resolutionCriteria:
-      "Resolves YES if Polymarket publishes an official Solana-based market venue (their own contracts, not via aggregator) with at least one tradeable market live before 2026-10-01.",
-    resolutionSources: ["polymarket.com blog", "Polymarket X/Twitter"],
-    priceHistory: [0.08, 0.10, 0.09, 0.11, 0.13, 0.12, 0.14, 0.12],
-    createdBy: "Foresight",
-    tags: ["polymarket", "solana", "web3"],
-  },
-  {
-    id: "chulagenie-vet",
-    slug: "chulagenie-vet-vertical-2026",
-    question: "ChulaGENIE จะเพิ่ม vet-specific agent ภายใน 2026?",
-    questionEn: "Will ChulaGENIE ship a veterinary-specific agent by 2026-12-31?",
-    category: "ai-research",
-    status: "open",
-    yesProbability: 0.22,
-    volumeUsd: 8_420,
-    openInterestUsd: 3_840,
-    closesAt: "2026-12-31T23:59:59Z",
-    resolutionCriteria:
-      "Resolves YES if ChulaGENIE (chula.ai / Chula AI portal) lists a published agent template explicitly labeled veterinary, vet, สัตวแพทย์, or equivalent before 2026-12-31.",
-    resolutionSources: ["chula.ai", "official Chula announcement"],
-    priceHistory: [0.15, 0.18, 0.20, 0.22, 0.24, 0.21, 0.23, 0.22],
-    createdBy: "Foresight",
-    tags: ["chulagenie", "ai", "vet"],
-  },
-  {
-    id: "tsla-fsd-v13",
-    slug: "tesla-fsd-v13-stable-2026",
-    question: "Tesla จะปล่อย FSD V13 stable build (non-beta) ภายใน 2026?",
-    questionEn: "Will Tesla ship FSD V13 as a stable non-beta release in 2026?",
-    category: "global-tech",
-    status: "open",
-    yesProbability: 0.34,
-    volumeUsd: 226_180,
-    openInterestUsd: 88_200,
-    closesAt: "2026-12-31T23:59:59Z",
-    resolutionCriteria:
-      "Resolves YES if Tesla removes the beta label from a V13.x.y FSD release for any production vehicle line before 2026-12-31.",
-    resolutionSources: ["tesla.com release notes", "Elon Musk on X"],
-    priceHistory: [0.28, 0.30, 0.32, 0.36, 0.33, 0.35, 0.34, 0.34],
-    createdBy: "Foresight",
-    tags: ["tesla", "fsd", "self-driving"],
-  },
-  {
-    id: "wc30-1.5b-viewers",
-    slug: "world-cup-2030-final-viewers-1.5b",
-    question: "นัดชิง World Cup 2030 จะมีผู้ชม > 1.5B?",
-    questionEn: "World Cup 2030 final — global TV audience > 1.5 billion?",
-    category: "global-sports",
-    status: "open",
-    yesProbability: 0.48,
-    volumeUsd: 12_800,
-    openInterestUsd: 5_400,
-    closesAt: "2030-08-01T00:00:00Z",
-    resolutionCriteria:
-      "Resolves YES if FIFA's official post-tournament audit reports a global cumulative live audience for the final match > 1.5 billion within 6 months of the final whistle.",
-    resolutionSources: ["fifa.com official audit", "Kantar Sport report"],
-    priceHistory: [0.50, 0.49, 0.51, 0.47, 0.46, 0.48, 0.49, 0.48],
-    createdBy: "Foresight",
-    tags: ["worldcup", "fifa", "audience"],
-  },
-  {
-    id: "kalshi-sea-market",
-    slug: "kalshi-first-sea-market-2026",
-    question: "Kalshi จะมี market ตลาด SEA (ไม่ใช่ US/EU) ก่อนสิ้นปี 2026?",
-    questionEn: "Will Kalshi list a Southeast Asia-specific market before 2026-12-31?",
-    category: "crypto",
-    status: "open",
-    yesProbability: 0.07,
-    volumeUsd: 3_280,
-    openInterestUsd: 1_400,
-    closesAt: "2026-12-31T23:59:59Z",
-    resolutionCriteria:
-      "Resolves YES if Kalshi lists any market whose underlying event is geographically specific to Singapore, Thailand, Vietnam, Indonesia, Philippines, Malaysia, or Myanmar before 2026-12-31.",
-    resolutionSources: ["kalshi.com markets index"],
-    priceHistory: [0.05, 0.06, 0.07, 0.08, 0.06, 0.07, 0.08, 0.07],
-    createdBy: "Foresight",
-    tags: ["kalshi", "competitor-watch", "sea"],
-  },
-  {
-    id: "id-presidential-2029",
-    slug: "indonesia-presidential-2029-winner-coalition-a",
-    question: "พรรค Coalition A จะชนะ presidential ของอินโดฯ 2029?",
-    questionEn: "Will Coalition A win the Indonesia 2029 presidential election?",
-    category: "sea-elections",
-    status: "open",
-    yesProbability: 0.31,
-    volumeUsd: 6_120,
-    openInterestUsd: 2_180,
-    closesAt: "2029-02-14T00:00:00Z",
-    resolutionCriteria:
-      "Resolves YES if KPU (Komisi Pemilihan Umum) certifies a candidate from Coalition A as president-elect of Indonesia in the 2029 election cycle.",
-    resolutionSources: ["kpu.go.id", "Reuters election desk"],
-    priceHistory: [0.28, 0.30, 0.32, 0.31, 0.33, 0.30, 0.32, 0.31],
-    createdBy: "Foresight",
-    tags: ["indonesia", "election", "sea"],
-  },
-];
 
-export function getMarketBySlug(slug: string): Market | undefined {
-  return MARKETS.find((m) => m.slug === slug);
+const REVALIDATE_SEC = 60;
+
+interface DbMarketRow {
+  id: string;
+  slug: string;
+  question: string;
+  question_en: string | null;
+  category: MarketCategory;
+  status: "open" | "closing-soon" | "resolved";
+  yes_probability: number;
+  volume_usd: number;
+  open_interest_usd: number;
+  closes_at: string;
+  resolution_criteria: string;
+  resolution_sources: string[];
+  price_history: number[] | null;
+  tags: string[] | null;
+  created_by: string;
 }
 
-export function marketsByCategory(category: Market["category"]): Market[] {
-  return MARKETS.filter((m) => m.category === category);
+function rowToMarket(r: DbMarketRow): Market {
+  return {
+    id: r.id,
+    slug: r.slug,
+    question: r.question,
+    questionEn: r.question_en ?? undefined,
+    category: r.category,
+    status: r.status,
+    yesProbability: Number(r.yes_probability),
+    volumeUsd: Number(r.volume_usd),
+    openInterestUsd: Number(r.open_interest_usd),
+    closesAt: r.closes_at,
+    resolutionCriteria: r.resolution_criteria,
+    resolutionSources: r.resolution_sources,
+    priceHistory: (r.price_history ?? []).map(Number),
+    tags: r.tags ?? [],
+    createdBy: r.created_by,
+  };
+}
+
+let cachedMarkets: { ts: number; data: Market[] } | null = null;
+
+/**
+ * Fetch every active market. Cached in-process for `REVALIDATE_SEC`.
+ * Falls back to the bundled seed if Supabase is unreachable.
+ */
+export async function listMarkets(): Promise<Market[]> {
+  if (cachedMarkets && Date.now() - cachedMarkets.ts < REVALIDATE_SEC * 1000) {
+    return cachedMarkets.data;
+  }
+
+  const supabase = getSupabase();
+  if (!supabase) {
+    cachedMarkets = { ts: Date.now(), data: SEED_MARKETS };
+    return SEED_MARKETS;
+  }
+
+  const { data, error } = await supabase
+    .from("foresight_markets")
+    .select(
+      "id,slug,question,question_en,category,status,yes_probability,volume_usd,open_interest_usd,closes_at,resolution_criteria,resolution_sources,price_history,tags,created_by",
+    )
+    .order("volume_usd", { ascending: false });
+
+  if (error || !data || data.length === 0) {
+    if (error && process.env.NODE_ENV !== "production") {
+      console.warn("[foresight] markets fetch failed, using seed:", error.message);
+    }
+    cachedMarkets = { ts: Date.now(), data: SEED_MARKETS };
+    return SEED_MARKETS;
+  }
+
+  const mapped = data.map(rowToMarket);
+  cachedMarkets = { ts: Date.now(), data: mapped };
+  return mapped;
+}
+
+export async function getMarketBySlug(slug: string): Promise<Market | undefined> {
+  const all = await listMarkets();
+  return all.find((m) => m.slug === slug);
+}
+
+export async function marketsByCategory(category: MarketCategory): Promise<Market[]> {
+  const all = await listMarkets();
+  return all.filter((m) => m.category === category);
 }
