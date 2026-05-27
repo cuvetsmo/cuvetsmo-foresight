@@ -62,24 +62,36 @@ interface PolymarketRow {
   active?: boolean;
 }
 
-async function fetchPolymarketPage(limit = 200): Promise<PolymarketRow[]> {
-  const url = new URL("https://gamma-api.polymarket.com/markets");
-  url.searchParams.set("limit", String(limit));
-  url.searchParams.set("active", "true");
-  url.searchParams.set("closed", "false");
-  url.searchParams.set("liquidity_num_min", "1000");
-  url.searchParams.set("order", "liquidity");
-  url.searchParams.set("ascending", "false");
-
-  try {
-    const res = await fetch(url.toString(), {
-      next: { revalidate: REVALIDATE_SEC, tags: ["cross-venue:polymarket"] },
-    });
-    if (!res.ok) return [];
-    return (await res.json()) as PolymarketRow[];
-  } catch {
-    return [];
+async function fetchPolymarketPage(): Promise<PolymarketRow[]> {
+  // Polymarket Gamma caps pages at 100. Walk a few pages so the matcher
+  // sees deeper inventory than just the top intraday/sports markets.
+  // Three round trips at 100 each = 300 markets ~1.5s, cached 1h.
+  const pages = [0, 100, 200];
+  const all: PolymarketRow[] = [];
+  for (const offset of pages) {
+    const url = new URL("https://gamma-api.polymarket.com/markets");
+    url.searchParams.set("limit", "100");
+    url.searchParams.set("offset", String(offset));
+    url.searchParams.set("active", "true");
+    url.searchParams.set("closed", "false");
+    url.searchParams.set("order", "liquidity");
+    url.searchParams.set("ascending", "false");
+    try {
+      const res = await fetch(url.toString(), {
+        next: {
+          revalidate: REVALIDATE_SEC,
+          tags: ["cross-venue:polymarket"],
+        },
+      });
+      if (!res.ok) continue;
+      const rows = (await res.json()) as PolymarketRow[];
+      all.push(...rows);
+      if (rows.length < 100) break;
+    } catch {
+      // continue with whatever pages succeeded
+    }
   }
+  return all;
 }
 
 function parsePolymarketYesProbability(row: PolymarketRow): number | undefined {
@@ -254,24 +266,30 @@ export function deriveSearchTermsForMarket(market: {
   question: string;
   questionEn?: string;
 }): string[][] {
-  // Curated map for the markets where a generic heuristic doesn't work
+  // Curated map. Strategy:
+  // - For domains where Polymarket / Kalshi DO list adjacent markets
+  //   (BTC, world cup, US tech, elections), keep keywords loose so we
+  //   surface "Polymarket has BTC daily questions" alongside our long-term.
+  // - For Foresight-exclusive domains (Thai politics, ASF, ChulaGENIE,
+  //   regional climate, Vision Pro Gen 2, Anthropic gating), expect
+  //   exclusiveToForesight=true to be the truthful answer.
   const overrides: Record<string, string[][]> = {
-    "btc-200k-2026": [["bitcoin", "200"], ["btc", "200"]],
+    "btc-200k-2026": [["bitcoin"], ["btc"]],
     "wc30-1.5b-viewers": [["world cup"]],
-    "id-presidential-2029": [["indonesia", "president"]],
-    "ph-presidential-2028": [["philippines", "president"]],
-    "th-elec-2027": [["thailand", "election"]],
-    "vn-economy-gdp-2027": [["vietnam", "gdp"]],
+    "id-presidential-2029": [["indonesia"]],
+    "ph-presidential-2028": [["philippines"]],
+    "th-elec-2027": [["thailand"]],
+    "vn-economy-gdp-2027": [["vietnam"]],
     "kalshi-sea-market": [["kalshi"]],
     "anthropic-1m-context-default": [["anthropic"], ["claude"]],
-    "chulagenie-vet": [["chulagenie"], ["chula", "ai"]],
-    "spacex-starship-iss-dock": [["spacex", "iss"], ["starship", "dock"]],
-    "apple-vision-pro2-2026": [["vision pro"]],
+    "chulagenie-vet": [["chulagenie"], ["chula"]],
+    "spacex-starship-iss-dock": [["spacex"], ["starship"]],
+    "apple-vision-pro2-2026": [["vision pro"], ["apple", "vr"]],
     "sea-games-2027-host": [["sea games"]],
     "asf-th-90d": [["asf"], ["swine fever"]],
     "lumpy-skin-2026": [["lumpy skin"]],
-    "thai-mr-2026": [["thailand", "measles"]],
-    "pm25-cnx-q3": [["chiang mai", "pm2.5"], ["pm25"]],
+    "thai-mr-2026": [["thailand", "measles"], ["measles"]],
+    "pm25-cnx-q3": [["chiang mai"], ["pm2.5"], ["pm25"]],
     "bkk-flood-2026": [["bangkok", "flood"]],
   };
   if (overrides[market.id]) return overrides[market.id];

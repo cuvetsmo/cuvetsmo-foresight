@@ -61,14 +61,40 @@ Edit `lib/markets.ts`. Required fields: `id`, `slug` (kebab-case, used in URL), 
 
 Pre-flight before commit: every market needs **machine-verifiable resolution criteria + at least one named source**. No "we'll figure it out later" markets.
 
+## AI verifier (`/api/resolve` + `/resolver`)
+
+The five-provider chain in `lib/resolver.ts` falls through in order:
+**Groq → Cerebras → SambaNova → OpenRouter → Mistral**. Set ANY ONE of these env vars in Vercel project settings and the resolver flips from Phase 0 fallback to live LLM verification:
+
+| Provider | Env var | Free tier signup |
+|---|---|---|
+| Groq (recommended — fastest, generous free) | `GROQ_API_KEY` | https://console.groq.com — instant signup, generous free tier |
+| Cerebras | `CEREBRAS_API_KEY` | https://cloud.cerebras.ai |
+| SambaNova | `SAMBANOVA_API_KEY` | https://cloud.sambanova.ai |
+| OpenRouter | `OPENROUTER_API_KEY` | https://openrouter.ai |
+| Mistral | `MISTRAL_API_KEY` | https://console.mistral.ai |
+
+Set with Vercel CLI:
+```bash
+echo "<your-key>" | vercel env add GROQ_API_KEY production
+vercel --prod --yes
+```
+
+Or via Vercel Dashboard → Project Settings → Environment Variables.
+
+The resolver applies an **Iron Rule 0 verify hook** in `lib/resolver.ts`:
+- status must be in `{verifiable, pending, ambiguous, refused}`
+- `verifiable` with confidence < 0.85 auto-downgrades to `ambiguous`
+- non-canonical model output escalates to ambiguous + appealAvailable=true
+
+Check live status: `GET /api/resolve/status` returns `{ mode, providersConfigured, providersAvailable }` — never leaks any key value.
+
 ## What's NOT here yet
 
-- Wallet/auth (Privy + Pimlico planned for Phase 1)
-- Real order book + matching engine (Phase 1)
+- Wallet/auth (Privy + Pimlico planned for Phase 2)
+- Real order book + matching engine (Phase 2)
 - On-chain settlement (Phase 2 — USDC on Base)
-- Foresight MCP server (planned standalone in `palm-mcp-suite` or its own repo)
-- AI-assisted resolver (Phase 1)
-- Supabase backend (Phase 1 — share with cuvetsmo if possible)
+- Foresight MCP server (separate repo: github.com/cuvetsmo/cuvetsmo-foresight-mcp — `npm publish` pending)
 - i18n proper (Phase 0 hardcodes Thai + English side-by-side in copy)
 
 ## Useful patterns

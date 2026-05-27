@@ -171,8 +171,10 @@ export function CrossVenueComparison({
                   </span>{" "}
                   This is the kind of niche the giants overlook — regional,
                   vertical, or just unfamiliar to a US-and-crypto-focused
-                  desk. Forecasting marketplace value is highest where the
-                  question literally cannot be priced elsewhere.
+                  desk. Polymarket leans intraday / US politics / sports;
+                  Kalshi is US fiat-only. Forecasting marketplace value is
+                  highest where the question literally cannot be priced
+                  elsewhere.
                 </p>
               </div>
             ) : (
