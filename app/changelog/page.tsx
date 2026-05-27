@@ -24,8 +24,10 @@ const releases: Release[] = [
     phase: "0.2.6 · DX surface",
     title: "Developer docs + machine-readable spec",
     bullets: [
-      "Public /docs developer reference: 5 MCP tools + 6 HTTP endpoints, copy-paste curl examples, response shapes verified against actual code.",
+      "Public /docs developer reference: 5 MCP tools + 8 HTTP endpoints, copy-paste curl examples, response shapes verified against actual code (6 doc-vs-code drifts caught in audit pass and fixed before ship).",
       "/api/openapi.json — OpenAPI 3.1 spec. Drop into Postman, generate SDK clients with openapi-typescript, wire into Stainless/Speakeasy.",
+      "/api/stats — one-shot aggregate stats endpoint for dashboards. Market counts by category/status, verifier mode, MCP version. Public-only — no per-user state.",
+      "JSON-LD structured data on /markets (Dataset + ItemList) and per-market detail (QAPage + Question with suggestedAnswer). Surfaces in Google rich results.",
       "foresight-mcp v0.2.0 published: tools now fetch from live /api/markets with 5-minute in-process cache, 6s abort, seed fallback on network failure. Override base via FORESIGHT_API_BASE.",
       "/docs OG image — developer-flavored share card distinct from the landing card.",
     ],

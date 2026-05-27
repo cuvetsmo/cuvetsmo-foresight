@@ -9,6 +9,7 @@ import { TradePanel } from "@/components/TradePanel";
 import { CrossVenueComparison } from "@/components/CrossVenueComparison";
 import { listMarkets, getMarketBySlug } from "@/lib/markets";
 import { CATEGORIES } from "@/lib/types";
+import { DEPLOY } from "@/lib/brand";
 
 export const revalidate = 60;
 
@@ -63,8 +64,43 @@ export default async function MarketDetailPage({ params }: PageProps) {
     { price: noPct - 3, size: 1120 },
   ];
 
+  // JSON-LD: schema.org Question (the market itself is a question with
+  // suggested answers YES + NO) wrapped in a QAPage. Rich-card eligible
+  // on Google. References the public Dataset on /markets.
+  const url = `${DEPLOY.baseUrl}/markets/${market.slug}`;
+  const questionLd = {
+    "@context": "https://schema.org",
+    "@type": "QAPage",
+    mainEntity: {
+      "@type": "Question",
+      "@id": `${url}#question`,
+      name: market.questionEn ?? market.question,
+      text: market.questionEn ?? market.question,
+      dateCreated: undefined,
+      url,
+      author: { "@id": `${DEPLOY.baseUrl}/#org` },
+      suggestedAnswer: [
+        {
+          "@type": "Answer",
+          text: `YES (${yesPct}%) — ${market.resolutionCriteria}`,
+          url: `${url}#yes`,
+        },
+        {
+          "@type": "Answer",
+          text: `NO (${noPct}%)`,
+          url: `${url}#no`,
+        },
+      ],
+      isPartOf: { "@id": `${DEPLOY.baseUrl}/markets#dataset` },
+    },
+  };
+
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(questionLd) }}
+      />
       <EcosystemBar current="foresight" />
       <Header />
 

@@ -5,6 +5,7 @@ import { Footer } from "@/components/Footer";
 import { MarketCard } from "@/components/MarketCard";
 import { listMarkets } from "@/lib/markets";
 import { CATEGORIES, type MarketCategory } from "@/lib/types";
+import { BRAND, DEPLOY } from "@/lib/brand";
 
 export const revalidate = 60;
 
@@ -18,8 +19,58 @@ export default async function MarketsPage() {
   const MARKETS = await listMarkets();
   const sampleCount = MARKETS.filter((m) => m.isSample).length;
 
+  // JSON-LD: schema.org Dataset describing the markets catalogue, plus an
+  // ItemList of the top-10 (by closes_at proximity) Question items for
+  // Google rich results.
+  const top = MARKETS.slice(0, 10);
+  const datasetLd = {
+    "@context": "https://schema.org",
+    "@type": "Dataset",
+    "@id": `${DEPLOY.baseUrl}/markets#dataset`,
+    name: `${BRAND.name} markets catalogue`,
+    description: `${MARKETS.length} forecasting markets across ${CATEGORIES.length} categories. Every market carries a machine-verifiable resolution criterion and at least one named primary source.`,
+    url: `${DEPLOY.baseUrl}/markets`,
+    creator: { "@id": `${DEPLOY.baseUrl}/#org` },
+    isAccessibleForFree: true,
+    license: `${DEPLOY.baseUrl}/brand`,
+    distribution: [
+      {
+        "@type": "DataDownload",
+        encodingFormat: "application/json",
+        contentUrl: `${DEPLOY.baseUrl}/api/markets`,
+      },
+      {
+        "@type": "DataDownload",
+        encodingFormat: "application/json",
+        contentUrl: `${DEPLOY.baseUrl}/api/openapi.json`,
+        description: "OpenAPI 3.1 spec for the public API",
+      },
+    ],
+  };
+  const itemListLd = {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    "@id": `${DEPLOY.baseUrl}/markets#itemlist`,
+    name: `Featured ${BRAND.name} markets`,
+    numberOfItems: top.length,
+    itemListElement: top.map((m, i) => ({
+      "@type": "ListItem",
+      position: i + 1,
+      url: `${DEPLOY.baseUrl}/markets/${m.slug}`,
+      name: m.questionEn ?? m.question,
+    })),
+  };
+
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(datasetLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListLd) }}
+      />
       <EcosystemBar current="foresight" />
       <Header />
 

@@ -7,7 +7,7 @@ import { BRAND, DEPLOY } from "@/lib/brand";
 
 export const metadata: Metadata = {
   title: "Developer docs · API + MCP",
-  description: `Developer reference for ${BRAND.name} — five MCP tools, six public HTTP endpoints, copy-paste examples. No signup, no API key in Phase 0.`,
+  description: `Developer reference for ${BRAND.name} — five MCP tools, eight public HTTP endpoints, copy-paste examples. No signup, no API key in Phase 0.`,
 };
 
 const BASE = DEPLOY.baseUrl;
@@ -172,6 +172,56 @@ curl '${BASE}/api/cross-venue?q=BoT%20rate%20cut&terms=bank+thailand&terms=rate+
   "timestamp": "ISO"
 }`,
   },
+  {
+    id: "get-openapi",
+    method: "GET",
+    path: "/api/openapi.json",
+    summary: "OpenAPI 3.1 machine-readable spec.",
+    description:
+      "The whole API in one JSON document. Drop into Postman / Insomnia / Bruno. Generate TypeScript clients via openapi-typescript. Wire into Stainless or Speakeasy for SDK pipelines. 1-hour edge cache.",
+    example: `curl ${BASE}/api/openapi.json | jq '.info'
+
+# Generate TS client
+npx openapi-typescript ${BASE}/api/openapi.json -o foresight.d.ts`,
+    responseShape: `{
+  "openapi": "3.1.0",
+  "info": { "title": "Foresight Public API", "version": "0.1.0", ... },
+  "paths": { /* 7 endpoints */ },
+  "components": { "schemas": { /* 10 reusable shapes */ } }
+}`,
+    notes: [
+      "The OpenAPI version field bumps on every breaking change — track it to catch contract drift in your client.",
+      "Self-referential — the spec describes the 7 functional endpoints but omits itself (a meta-endpoint about the API).",
+    ],
+  },
+  {
+    id: "get-stats",
+    method: "GET",
+    path: "/api/stats",
+    summary: "One-shot aggregate stats — for dashboards.",
+    description:
+      "Market counts (by category + status + sample-vs-real), verifier mode, MCP version. Public-only — never includes per-user state. Powers external status pages without scraping the UI.",
+    example: `curl ${BASE}/api/stats | jq '{ total: .markets.total, verifier: .verifier.mode }'`,
+    responseShape: `{
+  "name": "Foresight",
+  "phase": "0",
+  "generatedAt": "ISO",
+  "markets": {
+    "total": 17,
+    "sample": 17,
+    "real": 0,
+    "byStatus": { "open": 12, "closingSoon": 3, "resolved": 2 },
+    "byCategory": [{ "key": "thai-politics", "label": "Thai Politics", "count": 3 }]
+  },
+  "verifier": { "mode": "live | fallback", "providersConfigured": [...] },
+  "mcp": { "package": "foresight-mcp", "sourceVersion": "0.2.0", "npmPublished": false, "tools": [...] },
+  "docs": { "openapi": "/api/openapi.json", "developerPage": "/docs", "changelog": "/changelog" }
+}`,
+    notes: [
+      "Caches at the edge — same headers as /api/markets. Safe to poll once a minute from a dashboard.",
+      "npmPublished flips to true once the foresight-mcp package lands on the npm registry.",
+    ],
+  },
 ];
 
 interface McpTool {
@@ -334,7 +384,7 @@ export default function DocsPage() {
               Build forecasting into your agent.
             </h1>
             <p className="mt-5 max-w-2xl text-[var(--color-text-muted)] leading-[1.65]">
-              Five MCP tools, six HTTP endpoints, zero auth in Phase 0. Every
+              Five MCP tools, eight HTTP endpoints, zero auth in Phase 0. Every
               endpoint mirrors the same data the web UI renders — no second
               source of truth to keep in sync. Copy any command below and run
               it locally.
@@ -543,7 +593,7 @@ export default function DocsPage() {
                 03 · HTTP endpoints
               </p>
               <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-[var(--color-text-strong)] mb-4">
-                Six routes, no API key.
+                Eight routes, no API key.
               </h2>
               <p className="text-sm text-[var(--color-text-muted)] leading-[1.7]">
                 All endpoints are public in Phase 0. No signup, no rate limit

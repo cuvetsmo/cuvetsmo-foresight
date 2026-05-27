@@ -25,7 +25,7 @@ export async function GET() {
       title: `${BRAND.name} Public API`,
       version: "0.1.0",
       description:
-        `Six public endpoints powering ${BRAND.name}. No API key in Phase 0; fair-use only. ` +
+        `Seven functional endpoints powering ${BRAND.name} (this spec is the 8th meta-endpoint). No API key in Phase 0; fair-use only. ` +
         "Same data the web UI renders — single source of truth.",
       contact: {
         name: BRAND.name,
@@ -207,6 +207,20 @@ export async function GET() {
                   schema: { $ref: "#/components/schemas/Health" },
                 },
               },
+            },
+          },
+        },
+      },
+      "/api/stats": {
+        get: {
+          tags: ["status"],
+          summary: "One-shot aggregate stats",
+          description:
+            "Market counts by category/status, sample-vs-real split, verifier mode, MCP version. Public-only — no per-user state.",
+          responses: {
+            "200": {
+              description: "Aggregate stats",
+              content: { "application/json": { schema: { $ref: "#/components/schemas/Stats" } } },
             },
           },
         },
@@ -413,6 +427,69 @@ export async function GET() {
             baseUrl: { type: "string", format: "uri" },
             educationalBeta: { type: "boolean" },
             timestamp: { type: "string", format: "date-time" },
+          },
+        },
+        Stats: {
+          type: "object",
+          required: ["name", "baseUrl", "phase", "generatedAt", "markets", "verifier", "mcp", "endpoints"],
+          properties: {
+            name: { type: "string" },
+            baseUrl: { type: "string", format: "uri" },
+            phase: { type: "string" },
+            generatedAt: { type: "string", format: "date-time" },
+            markets: {
+              type: "object",
+              properties: {
+                total: { type: "integer", minimum: 0 },
+                sample: { type: "integer", minimum: 0 },
+                real: { type: "integer", minimum: 0 },
+                byStatus: {
+                  type: "object",
+                  properties: {
+                    open: { type: "integer", minimum: 0 },
+                    closingSoon: { type: "integer", minimum: 0 },
+                    resolved: { type: "integer", minimum: 0 },
+                  },
+                },
+                byCategory: {
+                  type: "array",
+                  items: {
+                    type: "object",
+                    properties: {
+                      key: { type: "string" },
+                      label: { type: "string" },
+                      count: { type: "integer", minimum: 0 },
+                    },
+                  },
+                },
+              },
+            },
+            verifier: {
+              type: "object",
+              properties: {
+                mode: { type: "string", enum: ["live", "fallback"] },
+                providersConfigured: { type: "array", items: { type: "string" } },
+                providersAvailable: { type: "array", items: { type: "string" } },
+              },
+            },
+            mcp: {
+              type: "object",
+              properties: {
+                package: { type: "string" },
+                sourceVersion: { type: "string" },
+                npmPublished: { type: "boolean" },
+                tools: { type: "array", items: { type: "string" } },
+                sourceUrl: { type: "string", format: "uri" },
+              },
+            },
+            docs: {
+              type: "object",
+              properties: {
+                openapi: { type: "string" },
+                developerPage: { type: "string" },
+                changelog: { type: "string" },
+              },
+            },
           },
         },
       },
