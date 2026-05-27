@@ -3,6 +3,7 @@ import { EcosystemBar } from "@/components/EcosystemBar";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { MarketCard } from "@/components/MarketCard";
+import { BRAND, DEPLOY } from "@/lib/brand";
 import { MARKETS } from "@/lib/markets";
 import { CATEGORIES } from "@/lib/types";
 
@@ -34,7 +35,7 @@ export default function LandingPage() {
               <div className="lg:col-span-7">
                 <p className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-[var(--color-emerald-deep)] mb-6 animate-fade-up">
                   <span className="pulse-dot" aria-hidden />
-                  Next-gen prediction marketplace
+                  A forecasting marketplace
                 </p>
                 <h1
                   className="text-5xl sm:text-6xl lg:text-7xl font-bold tracking-tight leading-[1.04] animate-fade-up text-[var(--color-text-strong)]"
@@ -53,10 +54,10 @@ export default function LandingPage() {
                   className="mt-8 max-w-2xl text-lg sm:text-xl leading-[1.65] text-[var(--color-text-muted)] animate-fade-up"
                   style={{ animationDelay: "0.1s" }}
                 >
-                  The prediction market built for Southeast Asia and the
-                  niches the rest overlook — Thai politics, monsoon, ASF
-                  outbreaks, AI research, sleeper crypto events.
-                  Cohort-curated, MCP-native, AI-assisted resolution.
+                  A marketplace for the events the world&apos;s biggest
+                  exchanges overlook — regional politics, climate, disease
+                  outbreaks, frontier research. Every question carries a
+                  public resolution criterion. Every source is named.
                 </p>
 
                 <div
@@ -112,9 +113,9 @@ export default function LandingPage() {
                   Markets moving right now.
                 </h2>
                 <p className="mt-3 text-[var(--color-text-muted)] max-w-xl">
-                  A live cross-section across politics, climate, vet, crypto,
-                  and frontier research. Click any to see the order book,
-                  resolution criteria, and price history.
+                  A live cross-section across politics, climate, health,
+                  crypto, and frontier research. Click any to see the order
+                  book, resolution criteria, and price history.
                 </p>
               </div>
               <Link
@@ -144,8 +145,8 @@ export default function LandingPage() {
                 A forecasting venue, not a casino.
               </h2>
               <p className="mt-4 text-lg text-[var(--color-text-muted)] leading-[1.65]">
-                Every market is a yes-or-no question with public,
-                machine-verifiable resolution criteria. Trade YES or NO
+                Every market is a yes-or-no question with a public,
+                machine-verifiable resolution criterion. Trade YES or NO
                 shares — the price IS the crowd&apos;s probability estimate.
               </p>
             </div>
@@ -154,17 +155,17 @@ export default function LandingPage() {
               <Step
                 num="01"
                 title="Pick a question"
-                body="Browse markets across SEA politics, climate, vet, crypto, AI, and global events. Every question has a public resolution criterion before you trade."
+                body="Browse markets across politics, climate, public health, frontier research, crypto, and culture. Every question has its resolution criterion published before you trade."
               />
               <Step
                 num="02"
                 title="Take a position"
-                body="Buy YES or NO shares. Your buy price IS your edge — pay less than your conviction implies, and the market is overpaying you to be right."
+                body="Buy YES or NO shares. Your buy price is your edge — pay less than your conviction implies, and the market is paying you to be right."
               />
               <Step
                 num="03"
-                title="Resolution + payout"
-                body="When the event resolves, holders of the correct outcome get paid $1 per share. Disputes go through our AI-assisted resolver + human appeal panel."
+                title="Resolution and payout"
+                body="When the event resolves, holders of the correct outcome get paid $1 per share. Disputes go through a multi-source verifier with a human appeal panel."
               />
             </div>
           </div>
@@ -176,15 +177,17 @@ export default function LandingPage() {
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
               <div className="lg:col-span-5">
                 <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--color-emerald-deep)] mb-3">
-                  Why Foresight
+                  Why {BRAND.name}
                 </p>
                 <h2 className="text-3xl sm:text-4xl font-bold tracking-tight text-[var(--color-text-strong)]">
                   The markets the giants will never list.
                 </h2>
                 <p className="mt-5 text-[var(--color-text-muted)] leading-[1.7]">
-                  Polymarket and Kalshi are built for US politics + global
-                  crypto. The world has a thousand other questions worth
-                  trading — and they sit in our backyard. We start there.
+                  Polymarket and Kalshi serve US politics and global crypto.
+                  The world has a thousand other questions worth pricing —
+                  regional elections, monsoon timing, disease outbreaks, AI
+                  research milestones, sleeper events the broadsheets miss.
+                  We list those.
                 </p>
               </div>
 
@@ -195,56 +198,97 @@ export default function LandingPage() {
           </div>
         </section>
 
-        {/* ─── MCP section — dark accent (mozi institutional pattern) ─── */}
+        {/* ─── Trust + transparency (replaces the old "cohort" section) ─── */}
+        <section
+          id="trust"
+          className="bg-[var(--color-bg-dark)] text-[var(--color-text-on-dark)] section-curve-top section-curve-bottom scroll-mt-20"
+        >
+          <div className="max-w-7xl mx-auto px-6 sm:px-8 py-20 sm:py-28">
+            <div className="max-w-3xl">
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--color-emerald-tint)] mb-3">
+                Trust + transparency
+              </p>
+              <h2 className="text-3xl sm:text-5xl font-bold tracking-tight text-white">
+                Forecasting earns trust the slow way.
+              </h2>
+              <p className="mt-5 text-lg text-white/75 leading-[1.7] max-w-2xl">
+                A prediction market is only as good as its resolution. Every
+                market on {BRAND.name} carries the same four guarantees from
+                day one.
+              </p>
+            </div>
+
+            <div className="mt-14 grid grid-cols-1 md:grid-cols-2 gap-6">
+              <TrustCard
+                title="Public resolution criteria"
+                body="Every market publishes its resolution criterion before the first trade. No interpretation room added later. If we cannot write a verifiable criterion, we do not list the market."
+              />
+              <TrustCard
+                title="Named primary sources"
+                body="Each resolution names the authoritative source — government statistics offices, official electoral commissions, peer-reviewed publications, exchange data feeds. No anonymous oracle votes."
+              />
+              <TrustCard
+                title="Multi-source verifier + appeal"
+                body="A verifier cross-checks each resolution against multiple sources and refuses ambiguous calls. Disputed resolutions escalate to a human appeal panel on a published timeline."
+              />
+              <TrustCard
+                title="Audit log on-chain"
+                body="Resolution decisions, source citations, and appeal outcomes are written to a public on-chain attestation. Anyone can re-run the audit."
+              />
+            </div>
+          </div>
+        </section>
+
+        {/* ─── MCP / developer surface ─── */}
         <section
           id="mcp"
-          className="bg-[var(--color-bg-dark)] text-[var(--color-text-on-dark)] section-curve-top section-curve-bottom scroll-mt-20"
+          className="bg-[var(--color-bg)] scroll-mt-20"
         >
           <div className="max-w-7xl mx-auto px-6 sm:px-8 py-20 sm:py-28">
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
               <div className="lg:col-span-6">
-                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--color-emerald-tint)] mb-3">
-                  Foresight MCP
+                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--color-emerald-deep)] mb-3">
+                  For developers
                 </p>
-                <h2 className="text-3xl sm:text-5xl font-bold tracking-tight text-white">
-                  The first prediction market your AI agent can talk to.
+                <h2 className="text-3xl sm:text-5xl font-bold tracking-tight text-[var(--color-text-strong)]">
+                  The first prediction market your agent can talk to.
                 </h2>
-                <p className="mt-5 text-white/75 leading-[1.7] max-w-xl">
-                  Every market is exposed via the Model Context Protocol —
-                  Claude, GPT, or any MCP-aware agent can query state,
-                  propose new markets, and stream resolution events.
-                  No SDK lock-in, no proprietary auth.
+                <p className="mt-5 text-[var(--color-text-muted)] leading-[1.7] max-w-xl">
+                  Every market is exposed through the Model Context Protocol —
+                  the open standard for letting language-model agents query
+                  state, propose new markets, and stream resolution events.
+                  No SDK lock-in. No proprietary authentication.
                 </p>
 
-                <ul className="mt-8 space-y-3 text-sm text-white/80">
-                  <McpFeature label="foresight_list_markets" desc="Browse + filter live markets" />
+                <ul className="mt-8 space-y-3 text-sm text-[var(--color-text)]">
+                  <McpFeature label="foresight_list_markets" desc="Browse, filter, sort live markets" />
                   <McpFeature label="foresight_get_market" desc="Probability, OI, volume, history" />
-                  <McpFeature label="foresight_propose_market" desc="Create market with criteria" />
-                  <McpFeature label="foresight_resolve_check" desc="Run AI-assisted resolver dry-run" />
-                  <McpFeature label="foresight_stream_events" desc="Subscribe to trade + resolve events" />
+                  <McpFeature label="foresight_propose_market" desc="Create a market with verifiable criteria" />
+                  <McpFeature label="foresight_resolve_check" desc="Dry-run the multi-source verifier" />
+                  <McpFeature label="foresight_stream_events" desc="Subscribe to trade and resolve events" />
                 </ul>
               </div>
 
               <div className="lg:col-span-6">
-                <pre className="rounded-2xl bg-black/40 border border-white/10 p-6 text-[13px] leading-[1.65] overflow-x-auto font-mono text-white/85">
-{`# Claude Code with the Foresight MCP server
-$ claude
+                <pre className="rounded-2xl bg-[var(--color-text-strong)] text-white border border-[var(--color-border-strong)] p-6 text-[13px] leading-[1.65] overflow-x-auto font-mono">
+{`# Any MCP-aware agent can use the public surface
+$ claude mcp add foresight ${DEPLOY.baseUrl}/mcp
 
-You: ตลาดอะไรน่าสนใจสำหรับ vet student?
-Claude: I queried foresight_list_markets with
-  category="thai-vet". Top by volume:
+You:  What's moving in the regional politics category?
+Agent: Top by 24h volume from foresight_list_markets:
 
-  • ASF outbreak in Thai pig farm < 90 days
-    YES 55% · $18.6k volume · 89d left
-  • PRRSV strain X detection in Q3 2026
-    YES 23% · $4.2k volume · 124d left
+  • Thailand snap election before Q4 2027
+    YES 42% · $184k volume · 16mo left
 
-  Want me to propose a new vet market or
-  inspect the resolution criteria for either?`}
+  • Indonesia 2029 — Coalition A wins
+    YES 31% · $6k volume · 32mo left
+
+  Want a deeper look at either, or shall I
+  propose a new market in this category?`}
                 </pre>
-
-                <p className="mt-5 text-xs text-white/55 font-mono">
-                  $ claude mcp add foresight https://foresight.cuvetsmo.com/mcp
+                <p className="mt-4 text-xs text-[var(--color-text-muted)] font-mono">
+                  Open spec · public OpenAPI · WebSocket stream · same fees
+                  for bots and humans.
                 </p>
               </div>
             </div>
@@ -252,40 +296,41 @@ Claude: I queried foresight_list_markets with
         </section>
 
         {/* ─── Roadmap ─── */}
-        <section id="roadmap" className="bg-[var(--color-bg)] scroll-mt-20">
+        <section id="roadmap" className="bg-[var(--color-bg-card)] scroll-mt-20">
           <div className="max-w-7xl mx-auto px-6 sm:px-8 py-20 sm:py-24">
             <div className="max-w-3xl mb-14">
               <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--color-emerald-deep)] mb-3">
                 Roadmap
               </p>
               <h2 className="text-3xl sm:text-4xl font-bold tracking-tight text-[var(--color-text-strong)]">
-                Three layers, three phases.
+                Wedge the venue first, then expand.
               </h2>
               <p className="mt-4 text-[var(--color-text-muted)] leading-[1.65]">
-                SEA wedge proves the venue. MCP layer makes us infrastructure.
-                Global expansion comes once liquidity is real.
+                Geography + verticals prove the venue. Developer surface
+                turns us into infrastructure. Global expansion follows
+                liquidity, not the other way around.
               </p>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <RoadmapCard
                 phase="Phase 0 — Now"
-                title="SEA + niche wedge"
+                title="Forecasting marketplace beta"
                 live
                 items={[
-                  "10 seed markets across 8 categories",
-                  "Mock liquidity for product-feel",
-                  "Cohort beta with Vet 86 + CUVETSMO",
-                  "Forecast accuracy leaderboard",
+                  "Seed markets across politics, climate, health, research",
+                  "Mock liquidity to validate product feel",
+                  "Public resolution criteria for every market",
+                  "Free educational tier",
                 ]}
               />
               <RoadmapCard
                 phase="Phase 1 — Next 90 days"
-                title="MCP + AI resolver"
+                title="Developer surface and resolver"
                 items={[
-                  "Foresight MCP server (5 tools)",
-                  "AI-assisted resolution + appeal panel",
-                  "Smart wallet onboarding (gas-sponsored)",
+                  "Public MCP server with five tools",
+                  "Multi-source verifier and appeal panel",
+                  "Gas-sponsored smart-wallet onboarding",
                   "Public market proposal flow",
                 ]}
               />
@@ -293,9 +338,9 @@ Claude: I queried foresight_list_markets with
                 phase="Phase 2 — 2027"
                 title="Global expansion"
                 items={[
-                  "USDC on Base mainnet",
-                  "Mobile-first PWA with Thai + EN",
-                  "Liquidity grants for market makers",
+                  "USDC settlement on Base mainnet",
+                  "Mobile-first PWA, English plus Thai plus Bahasa",
+                  "Liquidity grants for professional market makers",
                   "Open-source the protocol layer",
                 ]}
               />
@@ -303,33 +348,30 @@ Claude: I queried foresight_list_markets with
           </div>
         </section>
 
-        {/* ─── Cohort callout ─── */}
-        <section className="bg-[var(--color-bg-card)]">
-          <div className="max-w-5xl mx-auto px-6 sm:px-8 py-20 sm:py-24 text-center">
+        {/* ─── About / final CTA ─── */}
+        <section id="about" className="bg-[var(--color-bg)] scroll-mt-20">
+          <div className="max-w-4xl mx-auto px-6 sm:px-8 py-20 sm:py-24 text-center">
             <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--color-emerald-deep)] mb-4">
-              Built in the open
+              About {BRAND.name}
             </p>
             <h2 className="text-3xl sm:text-4xl font-bold tracking-tight text-[var(--color-text-strong)]">
-              The cohort is the moat.
+              Markets are how the world figures out what it actually believes.
             </h2>
             <p className="mt-5 max-w-2xl mx-auto text-[var(--color-text-muted)] leading-[1.7]">
-              Foresight is being built with Vet 86 + the CUVETSMO ecosystem —
-              5,000+ Chula vet students and alumni who care about the
-              questions nobody else lists. Liquidity bootstrapped from a
-              real community, not paid acquisition.
+              Prediction markets crossed ten billion dollars in monthly
+              volume in early 2026. The infrastructure built so far serves
+              a handful of categories — US politics, global crypto, major
+              sports. {BRAND.name} is built for everything else — the
+              regional, the vertical, the events that already shape lives
+              but never make it onto a screen.
             </p>
             <div className="mt-10 flex flex-wrap items-center justify-center gap-3">
               <Link href="/markets" className="btn-emerald">
-                Trade your first market
+                Explore live markets
                 <span aria-hidden>→</span>
               </Link>
-              <a
-                href="https://cuvetsmo.com"
-                className="btn-outline"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                About CUVETSMO
+              <a href="#how-it-works" className="btn-outline">
+                How resolution works
               </a>
             </div>
           </div>
@@ -385,6 +427,23 @@ function Step({ num, title, body }: { num: string; title: string; body: string }
   );
 }
 
+function TrustCard({ title, body }: { title: string; body: string }) {
+  return (
+    <div className="bg-white/5 border border-white/10 rounded-3xl p-7 backdrop-blur-sm">
+      <div className="flex items-center gap-2.5 mb-3">
+        <span
+          aria-hidden
+          className="inline-block h-1.5 w-1.5 rounded-full bg-[var(--color-emerald)]"
+        />
+        <h3 className="text-base font-semibold tracking-tight text-white">
+          {title}
+        </h3>
+      </div>
+      <p className="text-[15px] text-white/70 leading-[1.65]">{body}</p>
+    </div>
+  );
+}
+
 function HeroPreviewCard() {
   const m = MARKETS[0];
   const yesPct = Math.round(m.yesProbability * 100);
@@ -435,7 +494,7 @@ function HeroPreviewCard() {
 
       <p className="mt-5 pt-5 border-t border-[var(--color-border)] text-xs text-[var(--color-text-faint)] leading-[1.6]">
         Resolves via Election Commission of Thailand official announcement.
-        Demo data — real trading goes live in Phase 1.
+        Sample data — real-money trading is not yet live.
       </p>
     </div>
   );
@@ -446,14 +505,14 @@ function ComparisonTable() {
     feature: string;
     poly: string;
     kalshi: string;
-    foresight: string;
+    ours: string;
   }[] = [
-    { feature: "Region focus", poly: "US + global", kalshi: "US only", foresight: "SEA-first → global" },
-    { feature: "Thai politics", poly: "—", kalshi: "—", foresight: "✓" },
-    { feature: "Vet + agri events", poly: "—", kalshi: "—", foresight: "✓" },
-    { feature: "MCP / AI native", poly: "—", kalshi: "—", foresight: "✓" },
-    { feature: "AI-assisted resolver", poly: "UMA optimistic", kalshi: "Internal team", foresight: "Multi-source + appeal" },
-    { feature: "Mobile-first UX", poly: "Desktop", kalshi: "OK", foresight: "Mobile-native" },
+    { feature: "Region focus", poly: "US + global", kalshi: "US only", ours: "Regional first → global" },
+    { feature: "Regional politics", poly: "—", kalshi: "—", ours: "✓" },
+    { feature: "Public health + disease", poly: "—", kalshi: "—", ours: "✓" },
+    { feature: "Frontier research", poly: "—", kalshi: "—", ours: "✓" },
+    { feature: "Developer-first surface", poly: "Retro-fit", kalshi: "API only", ours: "MCP-native, day one" },
+    { feature: "Resolution model", poly: "UMA optimistic", kalshi: "Internal team", ours: "Multi-source + appeal" },
   ];
   return (
     <div className="bg-[var(--color-bg)] border border-[var(--color-border)] rounded-3xl overflow-hidden">
@@ -461,7 +520,7 @@ function ComparisonTable() {
         <div className="px-5 py-4">Feature</div>
         <div className="px-3 py-4 text-center">Polymarket</div>
         <div className="px-3 py-4 text-center">Kalshi</div>
-        <div className="px-3 py-4 text-center text-[var(--color-emerald-deep)]">Foresight</div>
+        <div className="px-3 py-4 text-center text-[var(--color-emerald-deep)]">{BRAND.name}</div>
       </div>
       <ul>
         {rows.map((r, i) => (
@@ -475,7 +534,7 @@ function ComparisonTable() {
             <div className="px-5 py-3.5 font-medium text-[var(--color-text)]">{r.feature}</div>
             <div className="px-3 py-3.5 text-center text-[var(--color-text-muted)] tabular-nums">{r.poly}</div>
             <div className="px-3 py-3.5 text-center text-[var(--color-text-muted)] tabular-nums">{r.kalshi}</div>
-            <div className="px-3 py-3.5 text-center font-semibold text-[var(--color-emerald-deep)] tabular-nums">{r.foresight}</div>
+            <div className="px-3 py-3.5 text-center font-semibold text-[var(--color-emerald-deep)] tabular-nums">{r.ours}</div>
           </li>
         ))}
       </ul>
@@ -491,10 +550,10 @@ function McpFeature({ label, desc }: { label: string; desc: string }) {
         className="mt-2 inline-block h-1 w-1 rounded-full bg-[var(--color-emerald)] shrink-0"
       />
       <div>
-        <code className="font-mono text-[13px] text-[var(--color-emerald-tint)]">
+        <code className="font-mono text-[13px] text-[var(--color-emerald-deep)] bg-[var(--color-emerald-tint)] px-1.5 py-0.5 rounded">
           {label}
         </code>
-        <span className="ml-3 text-white/65">{desc}</span>
+        <span className="ml-2.5 text-[var(--color-text-muted)]">{desc}</span>
       </div>
     </li>
   );
@@ -512,7 +571,7 @@ function RoadmapCard({
   live?: boolean;
 }) {
   return (
-    <div className="bg-[var(--color-bg-card)] border border-[var(--color-border)] rounded-3xl p-7 relative overflow-hidden">
+    <div className="bg-[var(--color-bg)] border border-[var(--color-border)] rounded-3xl p-7 relative overflow-hidden">
       {live && (
         <div className="absolute top-0 left-0 right-0 h-1 bg-[var(--color-emerald)]" aria-hidden />
       )}

@@ -1,4 +1,5 @@
 import type { MetadataRoute } from "next";
+import { DEPLOY } from "@/lib/brand";
 
 export default function robots(): MetadataRoute.Robots {
   return {
@@ -8,7 +9,7 @@ export default function robots(): MetadataRoute.Robots {
         allow: "/",
       },
     ],
-    sitemap: "https://foresight.cuvetsmo.com/sitemap.xml",
-    host: "https://foresight.cuvetsmo.com",
+    sitemap: `${DEPLOY.baseUrl}/sitemap.xml`,
+    host: DEPLOY.baseUrl,
   };
 }

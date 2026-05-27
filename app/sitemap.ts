@@ -1,8 +1,9 @@
 import type { MetadataRoute } from "next";
+import { DEPLOY } from "@/lib/brand";
 import { MARKETS } from "@/lib/markets";
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const base = "https://foresight.cuvetsmo.com";
+  const base = DEPLOY.baseUrl;
   const now = new Date();
   return [
     {

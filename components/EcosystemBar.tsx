@@ -1,46 +1,42 @@
 /**
- * EcosystemBar — shared CUVETSMO ecosystem switcher.
+ * EcosystemBar — optional cross-product nav bar.
  *
- * Same DNA as labs.cuvetsmo.com / imaging.cuvetsmo.com / web3.cuvetsmo.com
- * so visitors recognize the family. Foresight gets its own tinted accent.
- *
- * 7 surfaces:
- *   cuvetsmo.com (main)
- *   labs.cuvetsmo.com
- *   imaging.cuvetsmo.com
- *   web3.cuvetsmo.com
- *   foresight.cuvetsmo.com  ← current
- *   ai.cuvetsmo.com         (coming)
- *   vettobe.cuvetsmo.com    (coming)
+ * Default OFF in production (DEPLOY.showEcosystemBar). Render-side gated on
+ * the caller passing a list of siblings to render — when none provided, the
+ * component returns null. This makes the foresight surface 100% standalone
+ * by default and lets a sibling-network deployment opt back in.
  */
-type SurfaceKey =
-  | "main"
-  | "labs"
-  | "imaging"
-  | "web3"
-  | "foresight"
-  | "ai"
-  | "vettobe";
+import { DEPLOY } from "@/lib/brand";
 
-const SURFACES: { key: SurfaceKey; label: string; url: string; live: boolean }[] = [
-  { key: "main", label: "cuvetsmo", url: "https://cuvetsmo.com", live: true },
-  { key: "foresight", label: "foresight", url: "https://foresight.cuvetsmo.com", live: true },
-  { key: "imaging", label: "imaging", url: "https://imaging.cuvetsmo.com", live: true },
-  { key: "web3", label: "web3", url: "https://web3.cuvetsmo.com", live: true },
-  { key: "labs", label: "labs", url: "https://labs.cuvetsmo.com", live: true },
-  { key: "ai", label: "ai", url: "https://ai.cuvetsmo.com", live: false },
-  { key: "vettobe", label: "vettobe", url: "https://vettobe.cuvetsmo.com", live: false },
-];
+export interface EcosystemSurface {
+  key: string;
+  label: string;
+  url: string;
+  live: boolean;
+}
 
-export function EcosystemBar({ current }: { current: SurfaceKey }) {
+export function EcosystemBar({
+  current,
+  surfaces,
+  rail = "",
+}: {
+  current: string;
+  surfaces?: EcosystemSurface[];
+  rail?: string;
+}) {
+  if (!DEPLOY.showEcosystemBar) return null;
+  if (!surfaces || surfaces.length === 0) return null;
+
   return (
     <div className="w-full bg-[var(--color-bg-dark)] text-[var(--color-text-on-dark)] text-[12px]">
       <div className="max-w-7xl mx-auto px-6 py-2.5 flex items-center gap-x-4 gap-y-1 overflow-x-auto">
-        <span className="font-mono text-[10px] tracking-[0.18em] uppercase text-white/55 shrink-0">
-          CUVETSMO·OS
-        </span>
+        {rail ? (
+          <span className="font-mono text-[10px] tracking-[0.18em] uppercase text-white/55 shrink-0">
+            {rail}
+          </span>
+        ) : null}
         <div className="flex items-center gap-3 flex-wrap">
-          {SURFACES.map((s) => {
+          {surfaces.map((s) => {
             const isCurrent = s.key === current;
             return (
               <a

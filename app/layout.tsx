@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { IBM_Plex_Sans_Thai, Inter } from "next/font/google";
+import { BRAND, DEPLOY } from "@/lib/brand";
 import "./globals.css";
 
 const inter = Inter({
@@ -17,74 +18,71 @@ const ibmPlexSansThai = IBM_Plex_Sans_Thai({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://foresight.cuvetsmo.com"),
+  metadataBase: new URL(DEPLOY.baseUrl),
   title: {
-    default: "Foresight — Forecast the things that matter",
-    template: "%s — Foresight",
+    default: `${BRAND.name} — ${BRAND.tagline}`,
+    template: `%s — ${BRAND.name}`,
   },
-  description:
-    "Foresight is a prediction market for the SEA region — Thai politics, climate, vet disease outbreaks, and global events. Cohort-curated, MCP-native, AI-assisted resolution.",
-  applicationName: "Foresight",
+  description: BRAND.shortDescription,
+  applicationName: BRAND.name,
   keywords: [
     "prediction market",
-    "forecasting",
-    "Thailand",
-    "Southeast Asia",
-    "SEA",
-    "Polymarket",
-    "Kalshi",
-    "event contract",
-    "vet disease",
-    "ASF",
-    "PRRSV",
-    "climate",
-    "election",
+    "forecasting marketplace",
+    "event contracts",
+    "verifiable resolution",
+    "polymarket alternative",
+    "kalshi alternative",
+    "regional politics",
+    "climate forecasting",
+    "vet disease forecasting",
+    "frontier research",
     "MCP",
-    "cuvetsmo",
+    "AI agents",
   ],
-  authors: [{ name: "Foresight" }],
-  creator: "CUVETSMO",
-  publisher: "CUVETSMO",
+  authors: [{ name: BRAND.name }],
+  creator: BRAND.name,
+  publisher: BRAND.name,
   openGraph: {
-    title: "Foresight — Forecast the things that matter",
-    description:
-      "A prediction market built for Southeast Asia. Cohort-curated, MCP-native, AI-assisted resolution.",
+    title: `${BRAND.name} — ${BRAND.tagline}`,
+    description: BRAND.shortDescription,
     type: "website",
     locale: "en_US",
     alternateLocale: ["th_TH"],
-    siteName: "Foresight",
-    url: "https://foresight.cuvetsmo.com",
+    siteName: BRAND.name,
+    url: DEPLOY.baseUrl,
   },
   twitter: {
     card: "summary_large_image",
-    title: "Foresight — Forecast the things that matter",
-    description:
-      "A prediction market built for Southeast Asia. Cohort-curated, MCP-native, AI-assisted resolution.",
+    title: `${BRAND.name} — ${BRAND.tagline}`,
+    description: BRAND.shortDescription,
+    ...(DEPLOY.xHandle ? { creator: `@${DEPLOY.xHandle}` } : {}),
   },
   robots: {
     index: true,
     follow: true,
   },
   alternates: {
-    canonical: "https://foresight.cuvetsmo.com",
+    canonical: DEPLOY.baseUrl,
   },
 };
 
 const organizationJsonLd = {
   "@context": "https://schema.org",
   "@type": "Organization",
-  "@id": "https://foresight.cuvetsmo.com/#org",
-  name: "Foresight",
-  alternateName: ["Foresight", "foresight.cuvetsmo.com", "CUVETSMO Foresight"],
-  url: "https://foresight.cuvetsmo.com/",
-  description:
-    "Forecasting marketplace for Southeast Asian + global events. MCP-native, AI-assisted resolution.",
-  parentOrganization: {
-    "@type": "Organization",
-    "@id": "https://cuvetsmo.com/#smo",
-    name: "CUVETSMO",
-    url: "https://cuvetsmo.com/",
-  },
+  "@id": `${DEPLOY.baseUrl}/#org`,
+  name: BRAND.name,
+  url: `${DEPLOY.baseUrl}/`,
+  description: BRAND.description,
+};
+
+const websiteJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  "@id": `${DEPLOY.baseUrl}/#website`,
+  name: BRAND.name,
+  url: `${DEPLOY.baseUrl}/`,
+  inLanguage: ["en", "th"],
+  publisher: { "@id": `${DEPLOY.baseUrl}/#org` },
 };
 
 export default function RootLayout({
@@ -101,6 +99,10 @@ export default function RootLayout({
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd) }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteJsonLd) }}
         />
       </head>
       <body className="min-h-full flex flex-col bg-[var(--color-bg)] text-[var(--color-text)]">

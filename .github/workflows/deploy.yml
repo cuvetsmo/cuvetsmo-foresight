@@ -1,17 +1,20 @@
 name: Deploy to Vercel
 
-# The cuvetsmo GitHub org doesn't have the Vercel GitHub App installed,
-# so we deploy from CI using the Vercel CLI + a token stored as a
-# repository secret (VERCEL_TOKEN).
+# Manual deploy via Vercel CLI. The cuvetsmo GitHub org doesn't have the
+# Vercel GitHub App installed, so we deploy from CI using the Vercel CLI
+# plus a token stored as a repository secret.
 #
-# Required secrets (set via gh secret set):
-#   - VERCEL_TOKEN     — https://vercel.com/account/tokens
-#   - VERCEL_ORG_ID    — team_GZDXlQmo6KrpaaO0zJ16w9oB (same CUVETSMO team)
-#   - VERCEL_PROJECT_ID — set after first manual `vercel link` in this repo
+# Manual-only until the three secrets are set in this repo:
+#   - VERCEL_TOKEN      — https://vercel.com/account/tokens
+#   - VERCEL_ORG_ID     — Vercel team or user scope ID
+#   - VERCEL_PROJECT_ID — set after first `vercel link`
+#
+# Once secrets exist, flip the trigger back to `on: push: branches: [main]`
+# for auto-deploy. Until then, run manually via:
+#     gh workflow run "Deploy to Vercel"
+# or via the Actions tab.
 
 on:
-  push:
-    branches: [main]
   workflow_dispatch:
 
 concurrency:
@@ -26,6 +29,12 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
+      - name: Guard — skip if secrets are missing
+        if: ${{ secrets.VERCEL_TOKEN == '' }}
+        run: |
+          echo "::warning::VERCEL_TOKEN is not set in this repo. Skipping deploy."
+          exit 0
+
       - uses: actions/checkout@v4
 
       - uses: actions/setup-node@v4
