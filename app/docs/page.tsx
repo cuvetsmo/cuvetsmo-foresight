@@ -30,7 +30,7 @@ const apiSections: ApiSection[] = [
     path: "/api/markets",
     summary: "List every market — single source of truth.",
     description:
-      "Returns the full market catalogue in the same shape rendered by the web UI. The MCP server, downstream agents, and external tools all read from here. 60s edge cache + stale-while-revalidate, CORS open.",
+      "Returns the full market catalogue in the same shape rendered by the web UI. The MCP server, downstream agents, and external tools all read from here. Headers: max-age=30, s-maxage=60, stale-while-revalidate=300. CORS open.",
     example: `curl ${BASE}/api/markets | jq '.markets[0]'`,
     responseShape: `{
   "version": 1,
@@ -79,16 +79,18 @@ const apiSections: ApiSection[] = [
   "market": { "identifier": "string" } | null,
   "asOf": "ISO",
   "status": "verifiable | pending | ambiguous | refused",
-  "proposedOutcome": "yes | no",
-  "confidence": 0.92,
+  "proposedOutcome"?: "yes | no | void",
+  "confidence"?: 0.92,
   "reasoning": "string",
   "citedSources": [{ "source": "url", "checked": true, "note": "string" }],
   "appealAvailable": true,
-  "provider": "groq | cerebras | sambanova | openrouter | mistral | fallback"
+  "providerUsed"?: "groq | cerebras | sambanova | openrouter | mistral",
+  "refusalReason"?: "string"
 }`,
     notes: [
       "Confidence below 0.85 auto-downgrades status to ambiguous. The verifier never commits a low-confidence outcome.",
-      "5-provider fallback chain (Groq → Cerebras → SambaNova → OpenRouter → Mistral). When none are configured the route returns status=pending with a transparent fallback note.",
+      "5-provider fallback chain (Groq → Cerebras → SambaNova → OpenRouter → Mistral). When none are configured the route returns status=pending with a transparent note; providerUsed is omitted in that case.",
+      "12s abort timeout across the chain. proposedOutcome can also be 'void' when the resolver determines the market is unresolvable as-stated.",
     ],
   },
   {
@@ -233,18 +235,25 @@ const mcpTools: McpTool[] = [
     description:
       "Any MCP-aware agent can propose. Proposals land in the public review queue at /admin/proposals — they are not auto-listed. Iron-Rule-0 schema: requires a machine-verifiable resolution criterion plus at least one named primary source URL.",
     inputShape: `{
-  "question": "string",
-  "category": "thai-politics" | "thai-climate" | "thai-vet" | ...,
-  "closesAt": "ISO datetime",
-  "resolutionCriteria": "string  // must be machine-verifiable",
-  "resolutionSources": ["url", "url"],  // ≥1
-  "rationale"?: "string"
+  "question": "string  // 10-280 chars, yes/no phrasing",
+  "questionEn"?: "string  // optional English translation",
+  "category": "thai-politics" | "thai-climate" | "thai-vet" |
+              "sea-elections" | "crypto" | "global-tech" |
+              "global-sports" | "ai-research",
+  "closesAt": "ISO datetime  // must be in the future",
+  "resolutionCriteria": "string  // 40-1000 chars, machine-verifiable",
+  "resolutionSources": ["url"],  // 1-5 named primary sources
+  "tags"?: ["string"]  // 0-8 discovery tags, ≤40 chars each
 }`,
     outputShape: `{
-  "proposalId": "uuid",
-  "status": "queued",
-  "queueUrl": "${BASE}/admin/proposals",
-  "estimatedReviewHours": 48
+  "status": "pending_review",
+  "draftId": "draft-<timestamp>-<rand>",
+  "proposal": { /* the validated input echoed back */ },
+  "preview": {
+    "url": "${BASE}/propose?draft=<id>",
+    "reviewSlaHours": 48
+  },
+  "message": "string  // human-readable acceptance"
 }`,
   },
   {
@@ -275,20 +284,25 @@ const mcpTools: McpTool[] = [
     description:
       "Returns the recent event tail for one market or for all markets matching a filter. Phase 0 returns a synthetic tail; Phase 1 wires to Supabase realtime. Use for live dashboards, calibration trackers, or alert bots.",
     inputShape: `{
-  "filter"?: { "identifier"?: "string", "category"?: "..." },
-  "since"?: "ISO datetime",  // tail start
-  "limit"?: number  // default 50, max 200
+  "market"?: "string",  // id or slug — omit for global stream
+  "since"?: "ISO datetime"  // cursor — pass back the previous response's cursor
 }`,
     outputShape: `{
-  "count": 12,
   "events": [
     {
-      "type": "market.opened | market.price-tick | market.closing-soon | market.resolved | proposal.queued",
+      "cursor": "ISO",  // use as 'since' on next call
+      "type": "price-tick | trade | market-open | market-close | resolution",
       "marketId": "string",
-      "at": "ISO",
-      "payload": { /* event-specific */ }
+      "marketSlug": "string",
+      "marketUrl": "${BASE}/markets/<slug>",
+      "data": { /* event-specific payload */ },
+      "ts": "ISO"
     }
-  ]
+  ],
+  "count": 4,
+  "cursor": "ISO",  // next-page cursor (last event's ts)
+  "pollIntervalSec": 30,
+  "note": "string"
 }`,
   },
 ];
@@ -345,6 +359,13 @@ export default function DocsPage() {
                 className="inline-flex items-center gap-1.5 rounded-full border border-[var(--color-border-strong)] px-3 py-1.5 text-[var(--color-text-muted)] hover:border-[var(--color-emerald)] hover:text-[var(--color-emerald-deep)] transition-colors text-xs"
               >
                 MCP server source
+                <span aria-hidden>↗</span>
+              </a>
+              <a
+                href="/api/openapi.json"
+                className="inline-flex items-center gap-1.5 rounded-full border border-[var(--color-border-strong)] px-3 py-1.5 text-[var(--color-text-muted)] hover:border-[var(--color-emerald)] hover:text-[var(--color-emerald-deep)] transition-colors font-mono text-xs"
+              >
+                OpenAPI 3.1 spec
                 <span aria-hidden>↗</span>
               </a>
             </div>
@@ -651,6 +672,15 @@ export default function DocsPage() {
                       /api/resolve/status
                     </a>{" "}
                     — verifier mode
+                  </li>
+                  <li>
+                    <a
+                      href="/api/openapi.json"
+                      className="font-mono text-xs text-[var(--color-emerald-deep)] hover:underline"
+                    >
+                      /api/openapi.json
+                    </a>{" "}
+                    — OpenAPI 3.1
                   </li>
                 </ul>
               </article>

@@ -126,6 +126,14 @@ export function Footer() {
               </li>
               <li>
                 <Link
+                  href="/changelog"
+                  className="text-white/80 hover:text-[var(--color-emerald-tint)] transition-colors"
+                >
+                  Changelog
+                </Link>
+              </li>
+              <li>
+                <Link
                   href="/#trust"
                   className="text-white/80 hover:text-[var(--color-emerald-tint)] transition-colors"
                 >
