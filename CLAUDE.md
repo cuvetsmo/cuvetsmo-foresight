@@ -14,6 +14,12 @@ Foresight is a prediction market positioned as a **venue, not an aggregator** �
 | **Phase 1** | MCP-native protocol + AI-assisted resolver + smart wallet | next 90 days |
 | **Phase 2** | Global expansion — USDC on Base mainnet + mobile PWA + open-source protocol | 2027 |
 
+## MCP servers wired
+
+This project has `.mcp.json` (gitignored — never commit) wiring one dev-time MCP:
+
+- **`21st-magic`** (`@21st-dev/magic` v0.0.46) — 4 tools: `21st_magic_component_builder`, `21st_magic_component_inspiration`, `21st_magic_component_refiner`, `logo_search`. Free during beta. Use it when building NEW components (Toast, Command palette, advanced charts, admin tables) — don't refactor existing brand components. Auth via `API_KEY` env in `.mcp.json` (stored locally, never pushed). To add a component during a session, ask for "shadcn Toast notification with success variant" or similar; the builder picks a registry entry, customizes, and inserts.
+
 ## Stack decisions
 
 - **Next.js 16 App Router** — same as labs/imaging/web3 (consistency across CUVETSMO subdomains)
