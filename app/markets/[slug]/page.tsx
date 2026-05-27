@@ -5,6 +5,7 @@ import { EcosystemBar } from "@/components/EcosystemBar";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { Sparkline } from "@/components/Sparkline";
+import { TradePanel } from "@/components/TradePanel";
 import { listMarkets, getMarketBySlug } from "@/lib/markets";
 import { CATEGORIES } from "@/lib/types";
 
@@ -191,52 +192,7 @@ export default async function MarketDetailPage({ params }: PageProps) {
             {/* Trade panel (sticky on desktop) */}
             <aside className="lg:col-span-4">
               <div className="lg:sticky lg:top-24 space-y-5">
-                <div className="bg-[var(--color-bg)] border border-[var(--color-border)] rounded-3xl p-7 shadow-[0_18px_60px_-24px_rgba(15,23,42,0.18)]">
-                  <h3 className="text-sm font-semibold uppercase tracking-[0.16em] text-[var(--color-text-muted)] mb-5">
-                    Take a position
-                  </h3>
-                  <div className="grid grid-cols-2 gap-3 mb-5">
-                    <button className="btn-yes" type="button">
-                      <span>YES</span>
-                      <span className="font-mono text-sm">{yesPct}¢</span>
-                    </button>
-                    <button className="btn-no" type="button">
-                      <span>NO</span>
-                      <span className="font-mono text-sm">{noPct}¢</span>
-                    </button>
-                  </div>
-
-                  <label className="block text-xs uppercase tracking-[0.16em] font-semibold text-[var(--color-text-muted)] mb-2">
-                    Amount (USDC)
-                  </label>
-                  <div className="flex items-center gap-2">
-                    <input
-                      type="number"
-                      placeholder="100"
-                      disabled
-                      className="flex-1 px-3 py-2.5 rounded-xl bg-[var(--color-bg-card)] border border-[var(--color-border)] text-[var(--color-text)] tabular-nums focus:outline-none focus:border-[var(--color-emerald)] disabled:opacity-60"
-                    />
-                    <button
-                      type="button"
-                      disabled
-                      className="px-3 py-2.5 rounded-xl bg-[var(--color-bg-card)] border border-[var(--color-border)] text-xs font-semibold text-[var(--color-text-muted)]"
-                    >
-                      MAX
-                    </button>
-                  </div>
-
-                  <button
-                    type="button"
-                    disabled
-                    className="btn-emerald w-full mt-5 opacity-70 cursor-not-allowed"
-                  >
-                    Sign in to trade
-                  </button>
-                  <p className="mt-3 text-[11px] text-[var(--color-text-faint)] text-center leading-[1.5]">
-                    Live trading goes online in Phase 1. Phase 0 is read-only —
-                    explore the product feel, propose markets via MCP.
-                  </p>
-                </div>
+                <TradePanel market={market} />
 
                 <div className="bg-[var(--color-bg)] border border-[var(--color-border)] rounded-3xl p-6">
                   <h4 className="text-xs font-semibold uppercase tracking-[0.16em] text-[var(--color-text-muted)] mb-4">

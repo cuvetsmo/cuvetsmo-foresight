@@ -42,6 +42,14 @@ export const DEPLOY = {
   xHandle: process.env.NEXT_PUBLIC_X_HANDLE ?? "",
   /** Educational beta banner. Flip off when real money trading turns on. */
   educationalBeta: true,
+  /**
+   * Wallet phase. "waitlist" = collect intent + display "live trading
+   * coming soon"; "live" = real Privy + Pimlico smart-wallet flow.
+   * Phase 1 stays on "waitlist" until smart-contract settlement lands.
+   */
+  walletPhase: (process.env.NEXT_PUBLIC_WALLET_PHASE ?? "waitlist") as
+    | "waitlist"
+    | "live",
 } as const;
 
 /** Helper to build a fully-qualified URL from a path. */
