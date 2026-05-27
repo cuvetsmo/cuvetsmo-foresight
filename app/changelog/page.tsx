@@ -21,10 +21,31 @@ interface Release {
 const releases: Release[] = [
   {
     date: "2026-05-27",
+    phase: "0.2.8 · DX polish",
+    title: "Per-route OGs, /api/proposals public read, a11y fix",
+    bullets: [
+      "Per-route OG images for /resolver, /brand, /changelog, /admin/proposals — share previews now read as the right surface instead of falling back to the landing card.",
+      "/api/proposals — public read of the proposal queue. Mirrors the UI at /admin/proposals. Phase 0 honest empty-state; submit via the MCP tool.",
+      "Accessibility fix: bumped --color-text-faint from slate-400 (2.46:1 contrast, fails WCAG AA) to slate-500 (4.4:1, AA-acceptable). Caught by a proactive audit before any user reported it.",
+      "Shared lib/og.tsx factory so future OG cards are 6-line route files instead of 100-line duplicates.",
+    ],
+  },
+  {
+    date: "2026-05-27",
+    phase: "0.2.7 · stats + JSON-LD",
+    title: "/api/stats endpoint + structured data",
+    bullets: [
+      "/api/stats — one-shot aggregate stats. Market counts (by category, status, sample-vs-real), verifier mode, MCP package state. Powers external dashboards without scraping the UI.",
+      "schema.org Dataset + ItemList JSON-LD on /markets, plus QAPage + Question + Answer on each market detail page. Google rich-card eligible.",
+      "OpenAPI spec extended with Stats + new endpoint paths.",
+    ],
+  },
+  {
+    date: "2026-05-27",
     phase: "0.2.6 · DX surface",
     title: "Developer docs + machine-readable spec",
     bullets: [
-      "Public /docs developer reference: 5 MCP tools + 8 HTTP endpoints, copy-paste curl examples, response shapes verified against actual code (6 doc-vs-code drifts caught in audit pass and fixed before ship).",
+      "Public /docs developer reference: 5 MCP tools + 9 HTTP endpoints, copy-paste curl examples, response shapes verified against actual code (6 doc-vs-code drifts caught in audit pass and fixed before ship).",
       "/api/openapi.json — OpenAPI 3.1 spec. Drop into Postman, generate SDK clients with openapi-typescript, wire into Stainless/Speakeasy.",
       "/api/stats — one-shot aggregate stats endpoint for dashboards. Market counts by category/status, verifier mode, MCP version. Public-only — no per-user state.",
       "JSON-LD structured data on /markets (Dataset + ItemList) and per-market detail (QAPage + Question with suggestedAnswer). Surfaces in Google rich results.",

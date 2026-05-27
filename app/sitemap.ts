@@ -49,6 +49,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: "daily",
       priority: 0.4,
     },
+    {
+      url: `${base}/api/openapi.json`,
+      lastModified: now,
+      changeFrequency: "weekly",
+      priority: 0.3,
+    },
     ...markets.map((m) => ({
       url: `${base}/markets/${m.slug}`,
       lastModified: now,

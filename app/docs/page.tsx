@@ -7,7 +7,7 @@ import { BRAND, DEPLOY } from "@/lib/brand";
 
 export const metadata: Metadata = {
   title: "Developer docs · API + MCP",
-  description: `Developer reference for ${BRAND.name} — five MCP tools, eight public HTTP endpoints, copy-paste examples. No signup, no API key in Phase 0.`,
+  description: `Developer reference for ${BRAND.name} — five MCP tools, nine public HTTP endpoints, copy-paste examples. No signup, no API key in Phase 0.`,
 };
 
 const BASE = DEPLOY.baseUrl;
@@ -173,6 +173,29 @@ curl '${BASE}/api/cross-venue?q=BoT%20rate%20cut&terms=bank+thailand&terms=rate+
 }`,
   },
   {
+    id: "get-proposals",
+    method: "GET",
+    path: "/api/proposals",
+    summary: "Public read of the market proposal queue.",
+    description:
+      "Mirrors the UI at /admin/proposals — single source of truth, no second list. Phase 0 queue is intentionally empty; submit via the foresight_propose_market MCP tool. Approve/reject actions are NOT exposed here (auth-gated, Phase 2).",
+    example: `curl ${BASE}/api/proposals | jq '.byStatus'`,
+    responseShape: `{
+  "version": 1,
+  "count": 0,
+  "byStatus": { "pending": 0, "revisionsRequested": 0, "approved": 0, "rejected": 0 },
+  "generatedAt": "ISO",
+  "queueUrl": "/admin/proposals",
+  "submitVia": { "mcpTool": "foresight_propose_market", "mcpPackage": "foresight-mcp" },
+  "reviewSlaHours": 48,
+  "proposals": [/* MarketProposal[] */]
+}`,
+    notes: [
+      "Empty array is the honest empty-state — no fabricated proposals to look busy.",
+      "Read-only. Submit via the MCP tool, not via POST here. The review panel for approvals lands in Phase 2.",
+    ],
+  },
+  {
     id: "get-openapi",
     method: "GET",
     path: "/api/openapi.json",
@@ -186,12 +209,12 @@ npx openapi-typescript ${BASE}/api/openapi.json -o foresight.d.ts`,
     responseShape: `{
   "openapi": "3.1.0",
   "info": { "title": "Foresight Public API", "version": "0.1.0", ... },
-  "paths": { /* 7 endpoints */ },
-  "components": { "schemas": { /* 10 reusable shapes */ } }
+  "paths": { /* 8 endpoints */ },
+  "components": { "schemas": { /* 12 reusable shapes */ } }
 }`,
     notes: [
       "The OpenAPI version field bumps on every breaking change — track it to catch contract drift in your client.",
-      "Self-referential — the spec describes the 7 functional endpoints but omits itself (a meta-endpoint about the API).",
+      "Self-referential — the spec describes the 8 functional endpoints but omits itself (a meta-endpoint about the API).",
     ],
   },
   {
@@ -384,7 +407,7 @@ export default function DocsPage() {
               Build forecasting into your agent.
             </h1>
             <p className="mt-5 max-w-2xl text-[var(--color-text-muted)] leading-[1.65]">
-              Five MCP tools, eight HTTP endpoints, zero auth in Phase 0. Every
+              Five MCP tools, nine HTTP endpoints, zero auth in Phase 0. Every
               endpoint mirrors the same data the web UI renders — no second
               source of truth to keep in sync. Copy any command below and run
               it locally.
@@ -593,7 +616,7 @@ export default function DocsPage() {
                 03 · HTTP endpoints
               </p>
               <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-[var(--color-text-strong)] mb-4">
-                Eight routes, no API key.
+                Nine routes, no API key.
               </h2>
               <p className="text-sm text-[var(--color-text-muted)] leading-[1.7]">
                 All endpoints are public in Phase 0. No signup, no rate limit

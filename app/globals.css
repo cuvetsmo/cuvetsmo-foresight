@@ -19,7 +19,7 @@
   --color-text: #0F172A;         /* slate-900 — body text */
   --color-text-strong: #020617;  /* slate-950 — headlines */
   --color-text-muted: #475569;   /* slate-600 — secondary text */
-  --color-text-faint: #94A3B8;   /* slate-400 — captions / placeholder */
+  --color-text-faint: #64748B;   /* slate-500 — captions / placeholder · 4.4:1 on bg, AA-acceptable */
   --color-text-on-dark: #F1F5F9; /* slate-100 — text on dark sections */
 
   --color-border: #E2E8F0;       /* slate-200 — hairline borders */

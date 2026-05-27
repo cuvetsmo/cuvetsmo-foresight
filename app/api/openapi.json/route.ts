@@ -25,7 +25,7 @@ export async function GET() {
       title: `${BRAND.name} Public API`,
       version: "0.1.0",
       description:
-        `Seven functional endpoints powering ${BRAND.name} (this spec is the 8th meta-endpoint). No API key in Phase 0; fair-use only. ` +
+        `Eight functional endpoints powering ${BRAND.name} (this spec is the 9th meta-endpoint). No API key in Phase 0; fair-use only. ` +
         "Same data the web UI renders — single source of truth.",
       contact: {
         name: BRAND.name,
@@ -221,6 +221,20 @@ export async function GET() {
             "200": {
               description: "Aggregate stats",
               content: { "application/json": { schema: { $ref: "#/components/schemas/Stats" } } },
+            },
+          },
+        },
+      },
+      "/api/proposals": {
+        get: {
+          tags: ["intent"],
+          summary: "Public read of the market proposal queue",
+          description:
+            "Mirrors the UI at /admin/proposals. Submit new proposals via the foresight_propose_market MCP tool; approve/reject actions are auth-gated and not exposed here.",
+          responses: {
+            "200": {
+              description: "Proposal queue",
+              content: { "application/json": { schema: { $ref: "#/components/schemas/ProposalQueue" } } },
             },
           },
         },
@@ -490,6 +504,69 @@ export async function GET() {
                 changelog: { type: "string" },
               },
             },
+          },
+        },
+        MarketProposal: {
+          type: "object",
+          required: [
+            "id",
+            "draftId",
+            "question",
+            "category",
+            "closesAt",
+            "resolutionCriteria",
+            "resolutionSources",
+            "tags",
+            "proposedAt",
+            "reviewStatus",
+          ],
+          properties: {
+            id: { type: "string" },
+            draftId: { type: "string" },
+            question: { type: "string" },
+            questionEn: { type: "string", nullable: true },
+            category: { type: "string" },
+            closesAt: { type: "string", format: "date-time" },
+            resolutionCriteria: { type: "string" },
+            resolutionSources: { type: "array", items: { type: "string", format: "uri" } },
+            tags: { type: "array", items: { type: "string" } },
+            proposedBy: { type: "string", nullable: true },
+            proposedAt: { type: "string", format: "date-time" },
+            reviewedBy: { type: "string", nullable: true },
+            reviewedAt: { type: "string", format: "date-time", nullable: true },
+            reviewStatus: {
+              type: "string",
+              enum: ["pending", "approved", "rejected", "revisions-requested"],
+            },
+            reviewNotes: { type: "string", nullable: true },
+          },
+        },
+        ProposalQueue: {
+          type: "object",
+          required: ["version", "count", "byStatus", "generatedAt", "queueUrl", "submitVia", "reviewSlaHours", "proposals"],
+          properties: {
+            version: { type: "integer" },
+            count: { type: "integer", minimum: 0 },
+            byStatus: {
+              type: "object",
+              properties: {
+                pending: { type: "integer", minimum: 0 },
+                revisionsRequested: { type: "integer", minimum: 0 },
+                approved: { type: "integer", minimum: 0 },
+                rejected: { type: "integer", minimum: 0 },
+              },
+            },
+            generatedAt: { type: "string", format: "date-time" },
+            queueUrl: { type: "string" },
+            submitVia: {
+              type: "object",
+              properties: {
+                mcpTool: { type: "string" },
+                mcpPackage: { type: "string" },
+              },
+            },
+            reviewSlaHours: { type: "integer" },
+            proposals: { type: "array", items: { $ref: "#/components/schemas/MarketProposal" } },
           },
         },
       },
