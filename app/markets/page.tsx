@@ -16,7 +16,7 @@ export const metadata: Metadata = {
 
 export default async function MarketsPage() {
   const MARKETS = await listMarkets();
-  const totalVolume = MARKETS.reduce((sum, m) => sum + m.volumeUsd, 0);
+  const sampleCount = MARKETS.filter((m) => m.isSample).length;
 
   return (
     <>
@@ -31,12 +31,21 @@ export default async function MarketsPage() {
               All markets
             </p>
             <h1 className="text-4xl sm:text-5xl font-bold tracking-tight text-[var(--color-text-strong)]">
-              {MARKETS.length} live questions.
+              {MARKETS.length} open questions.
             </h1>
             <p className="mt-3 max-w-2xl text-[var(--color-text-muted)] leading-[1.65]">
-              ${(totalVolume / 1000).toFixed(1)}k total volume across{" "}
-              {CATEGORIES.length} categories. Every market has machine-verifiable
-              resolution criteria — no judgment calls, no rug.
+              Across {CATEGORIES.length} categories. Every market has
+              machine-verifiable resolution criteria and at least one named
+              primary source — no judgment calls, no rug.
+              {sampleCount > 0 && (
+                <>
+                  {" "}
+                  <span className="text-[var(--color-text-faint)]">
+                    Phase 0 — {sampleCount} curated samples · join the waitlist
+                    on any market.
+                  </span>
+                </>
+              )}
             </p>
 
             <div className="mt-8 flex flex-wrap gap-2">

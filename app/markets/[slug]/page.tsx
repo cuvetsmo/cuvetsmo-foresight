@@ -6,6 +6,7 @@ import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { Sparkline } from "@/components/Sparkline";
 import { TradePanel } from "@/components/TradePanel";
+import { CrossVenueComparison } from "@/components/CrossVenueComparison";
 import { listMarkets, getMarketBySlug } from "@/lib/markets";
 import { CATEGORIES } from "@/lib/types";
 
@@ -182,11 +183,42 @@ export default async function MarketDetailPage({ params }: PageProps) {
                 </div>
               </div>
 
-              {/* Order book */}
+              {/* Sample-data disclosure */}
+              {market.isSample && (
+                <div className="bg-[var(--color-bg)] border border-dashed border-[var(--color-border-strong)] rounded-3xl p-6">
+                  <div className="flex items-start gap-3">
+                    <span
+                      aria-hidden
+                      className="mt-1 w-5 h-5 rounded-full bg-[var(--color-text-faint)] text-white flex items-center justify-center text-[10px] font-bold"
+                    >
+                      ◦
+                    </span>
+                    <div className="text-sm leading-[1.65] text-[var(--color-text)]">
+                      <span className="font-semibold text-[var(--color-text-strong)]">
+                        Curated sample market.
+                      </span>{" "}
+                      Zero trades yet. The {Math.round(market.yesProbability * 100)}% number above
+                      is a reference probability, not a crowd-derived price. Order
+                      book below is illustrative depth shown to convey the future
+                      UX — turn waitlist intent into a real position when trading
+                      opens in Phase 1.
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Order book — illustrative depth, labeled as such */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                 <OrderBookSide title="YES bids" orders={yesOrders} side="yes" />
                 <OrderBookSide title="NO bids" orders={noOrders} side="no" />
               </div>
+
+              {/* Cross-venue comparison — Polymarket + Kalshi side-by-side */}
+              <CrossVenueComparison
+                slug={market.slug}
+                ourProbability={market.yesProbability}
+                isSample={market.isSample}
+              />
             </div>
 
             {/* Trade panel (sticky on desktop) */}
@@ -199,8 +231,14 @@ export default async function MarketDetailPage({ params }: PageProps) {
                     Market info
                   </h4>
                   <dl className="space-y-3 text-sm">
-                    <Row label="Volume" value={`$${(market.volumeUsd / 1000).toFixed(1)}k`} />
-                    <Row label="Open interest" value={`$${(market.openInterestUsd / 1000).toFixed(1)}k`} />
+                    {market.isSample ? (
+                      <Row label="Trades" value="0 · waitlist" />
+                    ) : (
+                      <>
+                        <Row label="Volume" value={`$${(market.volumeUsd / 1000).toFixed(1)}k`} />
+                        <Row label="Open interest" value={`$${(market.openInterestUsd / 1000).toFixed(1)}k`} />
+                      </>
+                    )}
                     <Row label="Closes" value={deadline.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })} />
                     <Row label="Time left" value={`${daysLeft}d`} />
                     <Row label="Created by" value={market.createdBy} mono />

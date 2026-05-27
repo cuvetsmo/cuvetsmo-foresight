@@ -4,6 +4,7 @@ import { CATEGORIES } from "@/lib/types";
 import { Sparkline } from "./Sparkline";
 
 function formatUsd(n: number): string {
+  if (n <= 0) return "$0";
   if (n >= 1_000_000) return `$${(n / 1_000_000).toFixed(1)}M`;
   if (n >= 1_000) return `$${(n / 1_000).toFixed(1)}k`;
   return `$${n.toFixed(0)}`;
@@ -39,23 +40,30 @@ export function MarketCard({ market }: { market: Market }) {
           <span aria-hidden>{cat?.emoji}</span>
           <span>{cat?.labelEn}</span>
         </span>
-        <span
-          className={
-            "badge " +
-            (market.status === "open"
-              ? "badge--open"
+        {market.isSample ? (
+          <span className="badge badge--sample">
+            <span aria-hidden>◦</span>
+            Sample
+          </span>
+        ) : (
+          <span
+            className={
+              "badge " +
+              (market.status === "open"
+                ? "badge--open"
+                : market.status === "closing-soon"
+                  ? "badge--closing"
+                  : "badge--resolved")
+            }
+          >
+            <span className="pulse-dot" aria-hidden />
+            {market.status === "open"
+              ? "Live"
               : market.status === "closing-soon"
-                ? "badge--closing"
-                : "badge--resolved")
-          }
-        >
-          <span className="pulse-dot" aria-hidden />
-          {market.status === "open"
-            ? "Live"
-            : market.status === "closing-soon"
-              ? "Closing soon"
-              : "Resolved"}
-        </span>
+                ? "Closing soon"
+                : "Resolved"}
+          </span>
+        )}
       </div>
 
       <h3 className="text-[17px] font-semibold leading-[1.35] tracking-tight text-[var(--color-text-strong)] line-clamp-3 min-h-[3.65rem]">
@@ -69,7 +77,7 @@ export function MarketCard({ market }: { market: Market }) {
               {yesPct}%
             </span>
             <span className="text-xs uppercase tracking-[0.18em] text-[var(--color-text-faint)] font-semibold">
-              YES
+              {market.isSample ? "ref" : "YES"}
             </span>
           </div>
           <div className="text-xs text-[var(--color-text-faint)] mt-0.5 tabular-nums">
@@ -87,8 +95,18 @@ export function MarketCard({ market }: { market: Market }) {
 
       <div className="mt-5 pt-5 border-t border-[var(--color-border)] flex items-center justify-between text-xs text-[var(--color-text-muted)] tabular-nums">
         <span>
-          <span className="font-semibold text-[var(--color-text)]">{formatUsd(market.volumeUsd)}</span>{" "}
-          volume
+          {market.isSample ? (
+            <span className="text-[var(--color-text-faint)]">
+              <span className="font-semibold text-[var(--color-text)]">0</span> trades · waitlist open
+            </span>
+          ) : (
+            <>
+              <span className="font-semibold text-[var(--color-text)]">
+                {formatUsd(market.volumeUsd)}
+              </span>{" "}
+              volume
+            </>
+          )}
         </span>
         <span>{formatDeadline(market.closesAt)}</span>
       </div>

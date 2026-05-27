@@ -30,6 +30,7 @@ interface DbMarketRow {
   price_history: number[] | null;
   tags: string[] | null;
   created_by: string;
+  is_sample: boolean | null;
 }
 
 function rowToMarket(r: DbMarketRow): Market {
@@ -49,6 +50,7 @@ function rowToMarket(r: DbMarketRow): Market {
     priceHistory: (r.price_history ?? []).map(Number),
     tags: r.tags ?? [],
     createdBy: r.created_by,
+    isSample: r.is_sample ?? true,
   };
 }
 
@@ -72,9 +74,9 @@ export async function listMarkets(): Promise<Market[]> {
   const { data, error } = await supabase
     .from("foresight_markets")
     .select(
-      "id,slug,question,question_en,category,status,yes_probability,volume_usd,open_interest_usd,closes_at,resolution_criteria,resolution_sources,price_history,tags,created_by",
+      "id,slug,question,question_en,category,status,yes_probability,volume_usd,open_interest_usd,closes_at,resolution_criteria,resolution_sources,price_history,tags,created_by,is_sample",
     )
-    .order("volume_usd", { ascending: false });
+    .order("closes_at", { ascending: true });
 
   if (error || !data || data.length === 0) {
     if (error && process.env.NODE_ENV !== "production") {

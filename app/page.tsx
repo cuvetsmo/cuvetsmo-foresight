@@ -14,12 +14,19 @@ export const revalidate = 60;
 
 export default async function LandingPage() {
   const MARKETS = await listMarkets();
-  const totalVolume = MARKETS.reduce((sum, m) => sum + m.volumeUsd, 0);
-  const totalOI = MARKETS.reduce((sum, m) => sum + m.openInterestUsd, 0);
+  const allSample = MARKETS.every((m) => m.isSample);
+  const closingSoonCount = MARKETS.filter((m) => {
+    const days = (new Date(m.closesAt).getTime() - Date.now()) / 86_400_000;
+    return days <= 180 && days >= 0;
+  }).length;
+  // Featured = closing soonest first so visitors see what to engage with
   const featured = [...MARKETS]
-    .sort((a, b) => b.volumeUsd - a.volumeUsd)
+    .sort(
+      (a, b) =>
+        new Date(a.closesAt).getTime() - new Date(b.closesAt).getTime(),
+    )
     .slice(0, 6);
-  const hero = MARKETS[0];
+  const hero = featured[0] ?? MARKETS[0];
 
   return (
     <>
@@ -84,24 +91,21 @@ export default async function LandingPage() {
                   className="mt-14 grid grid-cols-2 sm:grid-cols-4 gap-6 sm:gap-10 animate-fade-up"
                   style={{ animationDelay: "0.2s" }}
                 >
-                  <Stat to={MARKETS.length} label="markets live" />
+                  <Stat to={MARKETS.length} label="open questions" />
                   <Stat to={CATEGORIES.length} label="categories" />
-                  <Stat
-                    to={totalVolume / 1000}
-                    label="volume traded"
-                    tone="emerald"
-                    prefix="$"
-                    suffix="k"
-                    decimals={0}
-                  />
-                  <Stat
-                    to={totalOI / 1000}
-                    label="open interest"
-                    prefix="$"
-                    suffix="k"
-                    decimals={0}
-                  />
+                  <Stat to={closingSoonCount} label="closing in 6mo" tone="emerald" />
+                  <Stat to={0} label="trades · waitlist live" suffix="" />
                 </div>
+                {allSample && (
+                  <p
+                    className="mt-5 text-[11px] text-[var(--color-text-faint)] font-mono animate-fade-up"
+                    style={{ animationDelay: "0.22s" }}
+                  >
+                    Phase 0 — every market is a curated sample. Trading turns on
+                    when liquidity infrastructure ships. Join the waitlist on any
+                    market to lock your size + side.
+                  </p>
+                )}
               </div>
 
               <div
@@ -126,9 +130,10 @@ export default async function LandingPage() {
                   Markets moving right now.
                 </h2>
                 <p className="mt-3 text-[var(--color-text-muted)] max-w-xl">
-                  A live cross-section across politics, climate, health,
-                  crypto, and frontier research. Click any to see the order
-                  book, resolution criteria, and price history.
+                  Closing-soonest first across politics, climate, health,
+                  crypto, and frontier research. Click any to see the
+                  resolution criteria, named sources, and reference
+                  probability. Trade-intent waitlist live on each.
                 </p>
               </div>
               <Link
