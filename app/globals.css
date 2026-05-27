@@ -1,0 +1,231 @@
+@import "tailwindcss";
+
+/*
+ * Foresight — foresight.cuvetsmo.com
+ *
+ * Design language: mozi.finance structure + emerald accent.
+ * Light surface primary, alternating sections, rounded-4xl curves at
+ * major section transitions, slate text scale, emerald CTA + YES outcome,
+ * neutral slate for NO outcome (intentional non-red so the product reads
+ * as forecasting, not gambling).
+ */
+
+:root {
+  --color-bg: #FAFAFA;           /* page surface */
+  --color-bg-card: #FFFFFF;      /* card / elevated surface */
+  --color-bg-dark: #0F172A;      /* slate-900 — institutional / footer sections */
+  --color-bg-tint: #ECFDF5;      /* emerald-50 — soft hero glow */
+
+  --color-text: #0F172A;         /* slate-900 — body text */
+  --color-text-strong: #020617;  /* slate-950 — headlines */
+  --color-text-muted: #475569;   /* slate-600 — secondary text */
+  --color-text-faint: #94A3B8;   /* slate-400 — captions / placeholder */
+  --color-text-on-dark: #F1F5F9; /* slate-100 — text on dark sections */
+
+  --color-border: #E2E8F0;       /* slate-200 — hairline borders */
+  --color-border-strong: #CBD5E1; /* slate-300 — active borders */
+
+  --color-emerald: #10B981;      /* emerald-500 — primary CTA + YES */
+  --color-emerald-deep: #047857; /* emerald-700 — hover / pressed */
+  --color-emerald-tint: #D1FAE5; /* emerald-100 — soft bg highlight */
+  --color-emerald-glow: rgba(16, 185, 129, 0.18);
+
+  --color-slate-no: #64748B;     /* slate-500 — NO outcome neutral */
+  --color-slate-no-tint: #F1F5F9; /* slate-100 — NO soft bg */
+
+  --color-amber: #F59E0B;        /* amber-500 — closing-soon badge */
+  --color-amber-tint: #FEF3C7;   /* amber-100 */
+
+  --font-display: var(--font-inter), var(--font-ibm-plex-sans-thai), system-ui, -apple-system, sans-serif;
+  --font-body: var(--font-inter), var(--font-ibm-plex-sans-thai), system-ui, -apple-system, sans-serif;
+  --font-mono: ui-monospace, "SF Mono", "Cascadia Code", "JetBrains Mono", Menlo, monospace;
+}
+
+@theme inline {
+  --color-background: var(--color-bg);
+  --color-foreground: var(--color-text);
+  --color-emerald: var(--color-emerald);
+  --color-emerald-deep: var(--color-emerald-deep);
+  --color-emerald-tint: var(--color-emerald-tint);
+  --color-slate-no: var(--color-slate-no);
+  --color-border: var(--color-border);
+  --color-muted: var(--color-text-muted);
+  --font-sans: var(--font-body);
+  --font-display: var(--font-display);
+  --font-mono: var(--font-mono);
+
+  --radius-4xl: 2rem;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  text-rendering: optimizeLegibility;
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-body);
+  font-feature-settings: "kern" 1, "liga" 1, "ss01" 1, "tnum" 1;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  line-height: 1.6;
+}
+
+h1, h2, h3, h4 {
+  font-family: var(--font-display);
+  color: var(--color-text-strong);
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+}
+
+a { color: inherit; text-decoration: none; }
+button { font-family: inherit; }
+
+/* ─── Buttons ─────────────────────────────────────────────────────────── */
+.btn-emerald {
+  background: var(--color-emerald);
+  color: #FFFFFF;
+  padding: 0.75rem 1.5rem;
+  border-radius: 1rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  transition: background 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+.btn-emerald:hover {
+  background: var(--color-emerald-deep);
+  transform: translateY(-1px);
+  box-shadow: 0 12px 28px -10px var(--color-emerald-glow);
+}
+
+.btn-outline {
+  background: transparent;
+  color: var(--color-text-strong);
+  border: 1px solid var(--color-border-strong);
+  padding: 0.75rem 1.5rem;
+  border-radius: 1rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  transition: border-color 0.2s ease, color 0.2s ease, background 0.2s ease;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+.btn-outline:hover {
+  border-color: var(--color-emerald);
+  color: var(--color-emerald-deep);
+  background: var(--color-emerald-tint);
+}
+
+/* ─── YES / NO buy buttons ───────────────────────────────────────────── */
+.btn-yes {
+  background: var(--color-emerald-tint);
+  color: var(--color-emerald-deep);
+  border: 1px solid var(--color-emerald);
+  padding: 0.875rem 1rem;
+  border-radius: 0.875rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.15s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  width: 100%;
+}
+.btn-yes:hover {
+  background: var(--color-emerald);
+  color: #FFFFFF;
+  transform: translateY(-1px);
+}
+
+.btn-no {
+  background: var(--color-slate-no-tint);
+  color: #334155;
+  border: 1px solid var(--color-border-strong);
+  padding: 0.875rem 1rem;
+  border-radius: 0.875rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.15s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  width: 100%;
+}
+.btn-no:hover {
+  background: var(--color-slate-no);
+  color: #FFFFFF;
+  border-color: var(--color-slate-no);
+  transform: translateY(-1px);
+}
+
+/* ─── Badges ─────────────────────────────────────────────────────────── */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.25rem 0.625rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  border: 1px solid transparent;
+}
+.badge--open {
+  background: var(--color-emerald-tint);
+  color: var(--color-emerald-deep);
+  border-color: rgba(16, 185, 129, 0.25);
+}
+.badge--closing {
+  background: var(--color-amber-tint);
+  color: #92400E;
+  border-color: rgba(245, 158, 11, 0.3);
+}
+.badge--resolved {
+  background: var(--color-slate-no-tint);
+  color: #334155;
+  border-color: var(--color-border);
+}
+
+/* ─── Animations ─────────────────────────────────────────────────────── */
+@keyframes foresight-fade-up {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.animate-fade-up { animation: foresight-fade-up 0.7s ease-out both; }
+
+@keyframes foresight-pulse-dot {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%      { opacity: 0.55; transform: scale(0.85); }
+}
+.pulse-dot {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 9999px;
+  background: var(--color-emerald);
+  animation: foresight-pulse-dot 2s ease-in-out infinite;
+  display: inline-block;
+  flex-shrink: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-fade-up,
+  .pulse-dot { animation: none !important; }
+  html { scroll-behavior: auto; }
+}
+
+/* ─── Section transitions — mozi-style curved breaks ────────────────── */
+.section-curve-bottom { border-bottom-left-radius: 2rem; border-bottom-right-radius: 2rem; }
+.section-curve-top    { border-top-left-radius: 2rem; border-top-right-radius: 2rem; }

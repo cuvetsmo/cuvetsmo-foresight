@@ -1,0 +1,46 @@
+name: Deploy to Vercel
+
+# The cuvetsmo GitHub org doesn't have the Vercel GitHub App installed,
+# so we deploy from CI using the Vercel CLI + a token stored as a
+# repository secret (VERCEL_TOKEN).
+#
+# Required secrets (set via gh secret set):
+#   - VERCEL_TOKEN     — https://vercel.com/account/tokens
+#   - VERCEL_ORG_ID    — team_GZDXlQmo6KrpaaO0zJ16w9oB (same CUVETSMO team)
+#   - VERCEL_PROJECT_ID — set after first manual `vercel link` in this repo
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: vercel-deploy-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+  VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install Vercel CLI
+        run: npm install --global vercel@latest
+
+      - name: Pull Vercel env (production)
+        run: vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+
+      - name: Build
+        run: vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
+
+      - name: Deploy prebuilt artifacts
+        run: vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}
