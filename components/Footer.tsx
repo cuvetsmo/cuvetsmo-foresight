@@ -86,10 +86,10 @@ export function Footer() {
               </li>
               <li>
                 <Link
-                  href="/#mcp"
+                  href="/docs"
                   className="text-white/80 hover:text-[var(--color-emerald-tint)] transition-colors"
                 >
-                  For developers
+                  Developer docs
                 </Link>
               </li>
               <li>

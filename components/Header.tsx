@@ -38,10 +38,10 @@ export function Header() {
             How it works
           </Link>
           <Link
-            href="/#mcp"
+            href="/docs"
             className="text-[var(--color-text-muted)] hover:text-[var(--color-emerald-deep)] transition-colors"
           >
-            MCP
+            Docs
           </Link>
           <Link
             href="/#roadmap"
