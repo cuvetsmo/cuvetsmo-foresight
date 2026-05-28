@@ -332,7 +332,7 @@ export default async function LandingPage() {
                 phase="Phase 1 — Next 90 days"
                 title="Developer surface and resolver"
                 items={[
-                  "Public MCP server with six tools",
+                  "Public MCP server with eight tools",
                   "Multi-source verifier and appeal panel",
                   "Gas-sponsored smart-wallet onboarding",
                   "Public market proposal flow",

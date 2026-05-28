@@ -70,7 +70,7 @@ export async function GET() {
       },
       mcp: {
         package: "foresight-mcp",
-        sourceVersion: "0.2.0",
+        sourceVersion: "0.4.0",
         npmPublished: false, // flip to true after `npm publish` from cuvetsmo-foresight-mcp/
         tools: [
           "foresight_list_markets",
@@ -78,6 +78,9 @@ export async function GET() {
           "foresight_propose_market",
           "foresight_resolve_check",
           "foresight_stream_events",
+          "foresight_cross_venue",
+          "foresight_arxiv_search",
+          "foresight_wikidata_entity",
         ],
         sourceUrl: "https://github.com/cuvetsmo/cuvetsmo-foresight-mcp",
       },

@@ -21,6 +21,17 @@ interface Release {
 const releases: Release[] = [
   {
     date: "2026-05-27",
+    phase: "0.4.0 · MCP data-source tools",
+    title: "foresight_arxiv_search + foresight_wikidata_entity (8 tools)",
+    bullets: [
+      "foresight_arxiv_search — search ArXiv preprints (ai-research category resolver fuel). 'Has paper X dropped yet' resolution by submitted date. Atom parser verified deterministically against a fixture; live fetch confirmed.",
+      "foresight_wikidata_entity — ground a named entity (person, org, place, party) to a stable Wikidata Q-id so resolution criteria can't disagree on which entity is meant. Wikidata is CC0.",
+      "Both auth-free, both verified before shipping (Iron Rule 0: confirm the API works, don't assume). MCP package now exposes 8 tools.",
+      "Honest note: two other candidate sources didn't make the cut this round — the Bank of Thailand API host no longer resolves, and WAHIS (animal-disease) uses a POST-with-body search that needs a dedicated integration, not a drop-in.",
+    ],
+  },
+  {
+    date: "2026-05-27",
     phase: "0.3.0 · MCP cross-venue tool",
     title: "foresight_cross_venue — 6th MCP tool",
     bullets: [

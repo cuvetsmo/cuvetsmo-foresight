@@ -7,7 +7,7 @@ import { BRAND, DEPLOY } from "@/lib/brand";
 
 export const metadata: Metadata = {
   title: "Developer docs · API + MCP",
-  description: `Developer reference for ${BRAND.name} — six MCP tools, nine public HTTP endpoints, copy-paste examples. No signup, no API key in Phase 0.`,
+  description: `Developer reference for ${BRAND.name} — eight MCP tools, nine public HTTP endpoints, copy-paste examples. No signup, no API key in Phase 0.`,
 };
 
 const BASE = DEPLOY.baseUrl;
@@ -405,6 +405,57 @@ const mcpTools: McpTool[] = [
   "attribution": "string"
 }`,
   },
+  {
+    id: "arxiv-search",
+    name: "foresight_arxiv_search",
+    summary: "Search ArXiv preprints — ai-research resolver fuel.",
+    description:
+      "Search ArXiv by query (field-prefix syntax: all:, ti:, au:, cat:). Returns recent papers with title, authors, abstract, submitted/updated dates, primary category, PDF + abstract URLs. Use to dry-run 'has paper X been published yet' resolution. Public, no auth. ArXiv rate-limits aggressive callers (~1 req/3s) — one call per turn is fine. (v0.4.0+)",
+    inputShape: `{
+  "query": "string",  // e.g. "all:mixture of experts", "ti:scaling laws", "au:Bengio"
+  "maxResults"?: number,  // 1-20, default 5
+  "sortBy"?: "relevance" | "lastUpdatedDate" | "submittedDate"  // default submittedDate
+}`,
+    outputShape: `{
+  "query": "string",
+  "count": 5,
+  "papers": [{
+    "id": "2401.00123v2",
+    "title": "string",
+    "summary": "string  // abstract, truncated to 600 chars",
+    "authors": ["string"],
+    "published": "ISO", "updated": "ISO",
+    "primaryCategory": "cs.CL",
+    "absUrl": "https://arxiv.org/abs/...", "pdfUrl": "https://arxiv.org/pdf/..."
+  }],
+  "note": "string", "attribution": "string"
+}`,
+  },
+  {
+    id: "wikidata-entity",
+    name: "foresight_wikidata_entity",
+    summary: "Ground a named entity to a stable Wikidata Q-id.",
+    description:
+      "Resolve a name (person, org, place, party, event) to a stable Wikidata Q-id + label + description. Lets a resolution criterion cite a Q-id so the verifier and appeal panel can't disagree on WHICH entity is meant — stable IDs survive renames and translations. Wikidata is CC0. Public, no auth. (v0.4.0+)",
+    inputShape: `{
+  "query": "string",  // e.g. "Pheu Thai Party", "Prabowo Subianto", "Chiang Mai"
+  "language"?: "string",  // "en" or "th" most useful, default "en"
+  "limit"?: number  // 1-10, default 5
+}`,
+    outputShape: `{
+  "query": "string",
+  "language": "en",
+  "count": 3,
+  "entities": [{
+    "qid": "Q116758847",
+    "label": "Anthropic",
+    "description": "American artificial intelligence corporation",
+    "url": "https://www.wikidata.org/wiki/Q116758847",
+    "conceptUri": "http://www.wikidata.org/entity/Q116758847"
+  }],
+  "note": "string", "license": "Wikidata content is CC0 (public domain)."
+}`,
+  },
 ];
 
 export default function DocsPage() {
@@ -434,7 +485,7 @@ export default function DocsPage() {
               Build forecasting into your agent.
             </h1>
             <p className="mt-5 max-w-2xl text-[var(--color-text-muted)] leading-[1.65]">
-              Six MCP tools, nine HTTP endpoints, zero auth in Phase 0. Every
+              Eight MCP tools, nine HTTP endpoints, zero auth in Phase 0. Every
               endpoint mirrors the same data the web UI renders — no second
               source of truth to keep in sync. Copy any command below and run
               it locally.
@@ -547,7 +598,7 @@ export default function DocsPage() {
                   02 · MCP server
                 </p>
                 <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-white mb-4">
-                  Six tools, one server.
+                  Eight tools, one server.
                 </h2>
                 <p className="text-sm text-white/70 leading-[1.7]">
                   Standalone Node package. Reads from the public{" "}
