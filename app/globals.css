@@ -171,6 +171,20 @@ button { font-family: inherit; }
   transform: translateY(-1px);
 }
 
+/* ─── Form inputs (shared by ProposeForm + future forms) ────────────── */
+.fs-input {
+  width: 100%;
+  border-radius: 0.875rem;
+  border: 1px solid var(--color-border-strong);
+  background: var(--color-bg-card);
+  padding: 0.625rem 0.875rem;
+  font-size: 0.875rem;
+  color: var(--color-text);
+  transition: border-color 0.15s ease;
+}
+.fs-input::placeholder { color: var(--color-text-faint); }
+.fs-input:focus { border-color: var(--color-emerald); outline: none; }
+
 /* ─── Badges ─────────────────────────────────────────────────────────── */
 .badge {
   display: inline-flex;

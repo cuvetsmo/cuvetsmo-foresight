@@ -7,7 +7,7 @@ import { BRAND, DEPLOY } from "@/lib/brand";
 
 export const metadata: Metadata = {
   title: "Developer docs · API + MCP",
-  description: `Developer reference for ${BRAND.name} — eight MCP tools, nine public HTTP endpoints, copy-paste examples. No signup, no API key in Phase 0.`,
+  description: `Developer reference for ${BRAND.name} — eight MCP tools and a full public REST surface, copy-paste examples. No signup, no API key in Phase 0.`,
 };
 
 const BASE = DEPLOY.baseUrl;
@@ -178,9 +178,9 @@ curl '${BASE}/api/cross-venue?q=BoT%20rate%20cut&terms=bank+thailand&terms=rate+
     id: "get-proposals",
     method: "GET",
     path: "/api/proposals",
-    summary: "Public read of the market proposal queue.",
+    summary: "Read the market proposal queue.",
     description:
-      "Mirrors the UI at /admin/proposals — single source of truth, no second list. Phase 0 queue is intentionally empty; submit via the foresight_propose_market MCP tool. Approve/reject actions are NOT exposed here (auth-gated, Phase 2).",
+      "Mirrors the UI at /admin/proposals — single source of truth, no second list. Phase 0 queue is intentionally empty. Approve/reject actions are NOT exposed here (auth-gated, Phase 2).",
     example: `curl ${BASE}/api/proposals | jq '.byStatus'`,
     responseShape: `{
   "version": 1,
@@ -194,7 +194,61 @@ curl '${BASE}/api/cross-venue?q=BoT%20rate%20cut&terms=bank+thailand&terms=rate+
 }`,
     notes: [
       "Empty array is the honest empty-state — no fabricated proposals to look busy.",
-      "Read-only. Submit via the MCP tool, not via POST here. The review panel for approvals lands in Phase 2.",
+      "Read endpoint. To submit, POST to this same path (below) or use the foresight_propose_market MCP tool — same Iron Rule 0 contract.",
+    ],
+  },
+  {
+    id: "post-proposals",
+    method: "POST",
+    path: "/api/proposals",
+    summary: "Submit a market proposal (web form + agent share this).",
+    description:
+      "Browser equivalent of foresight_propose_market — the /propose page posts here. Identical Iron Rule 0 contract: 10-280 char question, machine-verifiable criterion (40-1000 chars) with a temporal anchor, 1-5 named sources, future close, no distress markets. Lands in the public queue — never auto-listed.",
+    example: `curl -X POST ${BASE}/api/proposals \\
+  -H "Content-Type: application/json" \\
+  -d '{
+    "question": "Will the BoT cut its policy rate at the December 2026 MPC meeting?",
+    "category": "thai-politics",
+    "closesAt": "2026-12-31T23:59:59Z",
+    "resolutionCriteria": "Resolves YES if the BoT MPC December 2026 statement records a policy rate decrease vs the previous meeting, per bot.or.th.",
+    "resolutionSources": ["https://www.bot.or.th/"]
+  }'`,
+    responseShape: `{
+  "status": "pending_review",
+  "draftId": "draft-<ts>-<rand>",
+  "queueUrl": "/admin/proposals",
+  "reviewSlaHours": 48,
+  "message": "string"
+}`,
+    notes: [
+      "400 = malformed field (length/date/email). 422 = failed Iron Rule 0 (distress market, no temporal anchor, or past close).",
+      "Same validation as the MCP tool, so the web form and agents can't propose anything the other couldn't.",
+    ],
+  },
+  {
+    id: "post-appeal",
+    method: "POST",
+    path: "/api/appeal",
+    summary: "Appeal a resolver dry-run result.",
+    description:
+      "Closes the loop on appealAvailable:true. The verifier may refuse or be wrong; this logs a human-reviewable appeal. Never auto-changes the result. The appeal panel under any /resolver result posts here.",
+    example: `curl -X POST ${BASE}/api/appeal \\
+  -H "Content-Type: application/json" \\
+  -d '{
+    "question": "Will X happen by Y?",
+    "disputedStatus": "ambiguous",
+    "reasoning": "The criterion was clearly met on 2027-03-02 — see the official source.",
+    "evidenceUrl": "https://example.gov/official-notice"
+  }'`,
+    responseShape: `{
+  "status": "received",
+  "queued": true,
+  "message": "string",
+  "reviewSlaHours": 72
+}`,
+    notes: [
+      "question + reasoning (≥10 chars) are required; identifier, evidenceUrl, email optional.",
+      "An appeal is logged, never auto-accepted — a moderator reviews the criterion + evidence against the named sources.",
     ],
   },
   {
@@ -485,7 +539,7 @@ export default function DocsPage() {
               Build forecasting into your agent.
             </h1>
             <p className="mt-5 max-w-2xl text-[var(--color-text-muted)] leading-[1.65]">
-              Eight MCP tools, nine HTTP endpoints, zero auth in Phase 0. Every
+              Eight MCP tools, a full HTTP surface, zero auth in Phase 0. Every
               endpoint mirrors the same data the web UI renders — no second
               source of truth to keep in sync. Copy any command below and run
               it locally.
@@ -694,7 +748,7 @@ export default function DocsPage() {
                 03 · HTTP endpoints
               </p>
               <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-[var(--color-text-strong)] mb-4">
-                Nine routes, no API key.
+                The full REST surface, no API key.
               </h2>
               <p className="text-sm text-[var(--color-text-muted)] leading-[1.7]">
                 All endpoints are public in Phase 0. No signup, no rate limit

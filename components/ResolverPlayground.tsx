@@ -400,6 +400,14 @@ export function ResolverPlayground() {
                     verified via {result.providerUsed}
                   </p>
                 )}
+
+                {result.appealAvailable && (
+                  <AppealPanel
+                    question={question}
+                    disputedStatus={result.status}
+                    disputedOutcome={result.proposedOutcome}
+                  />
+                )}
               </motion.div>
             )}
           </AnimatePresence>
@@ -432,5 +440,146 @@ function Field({
       </div>
       {children}
     </label>
+  );
+}
+
+/**
+ * AppealPanel — closes the loop on `appealAvailable: true`. The verifier
+ * is allowed to refuse or be wrong; this is how a human contests it.
+ * Collapsed by default (a quiet link, not a loud CTA — appealing is the
+ * exception, not the default action). Posts to /api/appeal, which logs
+ * for human review and never auto-changes the result.
+ */
+function AppealPanel({
+  question,
+  disputedStatus,
+  disputedOutcome,
+}: {
+  question: string;
+  disputedStatus: string;
+  disputedOutcome?: string;
+}) {
+  const [open, setOpen] = useState(false);
+  const [reasoning, setReasoning] = useState("");
+  const [evidenceUrl, setEvidenceUrl] = useState("");
+  const [email, setEmail] = useState("");
+  const [state, setState] = useState<"idle" | "sending" | "done" | "error">("idle");
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+
+  async function submit() {
+    if (reasoning.trim().length < 10) {
+      setErrorMsg("Add at least a sentence on why the result is wrong.");
+      setState("error");
+      return;
+    }
+    setState("sending");
+    setErrorMsg(null);
+    try {
+      const res = await fetch("/api/appeal", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          question,
+          disputedStatus,
+          disputedOutcome,
+          reasoning: reasoning.trim(),
+          evidenceUrl: evidenceUrl.trim() || undefined,
+          email: email.trim() || undefined,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setErrorMsg("error" in data ? data.error : `HTTP ${res.status}`);
+        setState("error");
+        return;
+      }
+      setState("done");
+    } catch (err) {
+      setErrorMsg(err instanceof Error ? err.message : "Network error");
+      setState("error");
+    }
+  }
+
+  if (state === "done") {
+    return (
+      <div className="mt-5 pt-4 border-t border-[var(--color-border)]">
+        <p className="text-sm text-[var(--color-emerald-deep)] font-medium">
+          Appeal logged for human review.
+        </p>
+        <p className="mt-1 text-[13px] leading-[1.6] text-[var(--color-text-muted)]">
+          It does not change this dry-run automatically — a moderator reviews
+          the criterion and your evidence against the named sources. Phase 1
+          adds a public appeals queue.
+        </p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="mt-5 pt-4 border-t border-[var(--color-border)]">
+      {!open ? (
+        <button
+          type="button"
+          onClick={() => setOpen(true)}
+          className="text-[13px] font-medium text-[var(--color-text-muted)] hover:text-[var(--color-emerald-deep)] transition-colors"
+        >
+          Think this is wrong? Appeal the result →
+        </button>
+      ) : (
+        <div className="space-y-3">
+          <div>
+            <div className="text-xs uppercase tracking-[0.18em] text-[var(--color-text-faint)] font-semibold mb-1">
+              Appeal this {disputedStatus} result
+            </div>
+            <p className="text-[13px] leading-[1.6] text-[var(--color-text-muted)]">
+              The verifier is allowed to be wrong or to refuse. Tell us why,
+              with a public source if you have one. Logged for human review —
+              never auto-accepted.
+            </p>
+          </div>
+          <textarea
+            value={reasoning}
+            onChange={(e) => setReasoning(e.target.value)}
+            rows={3}
+            placeholder="Why is this result wrong? e.g., 'The criterion was met on 2027-03-02 — see the official source below.'"
+            className="w-full rounded-xl border border-[var(--color-border-strong)] bg-[var(--color-bg-card)] px-3.5 py-2.5 text-sm text-[var(--color-text)] placeholder:text-[var(--color-text-faint)] focus:border-[var(--color-emerald)] focus:outline-none resize-y"
+          />
+          <input
+            type="url"
+            value={evidenceUrl}
+            onChange={(e) => setEvidenceUrl(e.target.value)}
+            placeholder="Evidence URL (optional) — https://..."
+            className="w-full rounded-xl border border-[var(--color-border-strong)] bg-[var(--color-bg-card)] px-3.5 py-2.5 text-sm font-mono text-[var(--color-text)] placeholder:text-[var(--color-text-faint)] focus:border-[var(--color-emerald)] focus:outline-none"
+          />
+          <input
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="Email for follow-up (optional)"
+            className="w-full rounded-xl border border-[var(--color-border-strong)] bg-[var(--color-bg-card)] px-3.5 py-2.5 text-sm text-[var(--color-text)] placeholder:text-[var(--color-text-faint)] focus:border-[var(--color-emerald)] focus:outline-none"
+          />
+          {state === "error" && errorMsg && (
+            <p className="text-[13px] text-[#B91C1C]">{errorMsg}</p>
+          )}
+          <div className="flex items-center gap-3">
+            <button
+              type="button"
+              onClick={submit}
+              disabled={state === "sending"}
+              className="btn-emerald text-sm py-2 px-4 disabled:opacity-60"
+            >
+              {state === "sending" ? "Submitting…" : "Submit appeal"}
+            </button>
+            <button
+              type="button"
+              onClick={() => setOpen(false)}
+              className="text-[13px] text-[var(--color-text-faint)] hover:text-[var(--color-text-muted)]"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
   );
 }

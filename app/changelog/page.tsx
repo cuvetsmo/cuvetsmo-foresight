@@ -21,6 +21,20 @@ interface Release {
 const releases: Release[] = [
   {
     date: "2026-05-27",
+    phase: "0.5.0 · participation surface",
+    title: "Propose form, appeal flow, resolver cross-venue reference",
+    bullets: [
+      "/propose — public market-proposal form. Anyone can propose, no wallet, no signup. Same Iron Rule 0 contract as the foresight_propose_market MCP tool (machine-verifiable criterion + named source + future close + no distress markets), with live client-side hints.",
+      "POST /api/proposals — the form and agents now share one submission endpoint with identical validation.",
+      "Appeal flow — every resolver dry-run with appealAvailable now has an inline appeal panel. POST /api/appeal logs a human-reviewable appeal (never auto-changes the result). Closes the loop on a promise the verifier was already making.",
+      "/api/resolve now attaches a crossVenueReference for known markets — what Polymarket/Kalshi/Manifold price the same question at, as a sanity signal. It does NOT feed the verifier's decision; that still rests on the criterion + named sources.",
+    ],
+    knownLimits: [
+      "Proposals + appeals are logged for human review (stdout + audit_log) — Phase 1 adds dedicated tables + a public appeals queue mirroring /admin/proposals.",
+    ],
+  },
+  {
+    date: "2026-05-27",
     phase: "0.4.0 · MCP data-source tools",
     title: "foresight_arxiv_search + foresight_wikidata_entity (8 tools)",
     bullets: [

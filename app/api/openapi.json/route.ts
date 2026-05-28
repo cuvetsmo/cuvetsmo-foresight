@@ -25,7 +25,7 @@ export async function GET() {
       title: `${BRAND.name} Public API`,
       version: "0.1.0",
       description:
-        `Eight functional endpoints powering ${BRAND.name} (this spec is the 9th meta-endpoint). No API key in Phase 0; fair-use only. ` +
+        `The public REST surface powering ${BRAND.name} — this spec covers every functional endpoint (it omits only itself). No API key in Phase 0; fair-use only. ` +
         "Same data the web UI renders — single source of truth.",
       contact: {
         name: BRAND.name,
@@ -230,12 +230,49 @@ export async function GET() {
           tags: ["intent"],
           summary: "Public read of the market proposal queue",
           description:
-            "Mirrors the UI at /admin/proposals. Submit new proposals via the foresight_propose_market MCP tool; approve/reject actions are auth-gated and not exposed here.",
+            "Mirrors the UI at /admin/proposals. Approve/reject actions are auth-gated and not exposed here.",
           responses: {
             "200": {
               description: "Proposal queue",
               content: { "application/json": { schema: { $ref: "#/components/schemas/ProposalQueue" } } },
             },
+          },
+        },
+        post: {
+          tags: ["intent"],
+          summary: "Submit a market proposal (browser equivalent of foresight_propose_market)",
+          description:
+            "Same Iron Rule 0 contract as the MCP tool: machine-verifiable criterion with a temporal anchor, 1-5 named sources, future close date, no distress markets. Lands in the public review queue — never auto-listed.",
+          requestBody: {
+            required: true,
+            content: { "application/json": { schema: { $ref: "#/components/schemas/ProposeInput" } } },
+          },
+          responses: {
+            "200": {
+              description: "Accepted into review queue",
+              content: { "application/json": { schema: { $ref: "#/components/schemas/ProposeAccepted" } } },
+            },
+            "400": { description: "Malformed field (length, date, email)" },
+            "422": { description: "Failed Iron Rule 0 check (distress / no temporal anchor / past close)" },
+          },
+        },
+      },
+      "/api/appeal": {
+        post: {
+          tags: ["verifier"],
+          summary: "Appeal a resolver dry-run result",
+          description:
+            "Closes the loop on appealAvailable:true. The verifier may refuse or be wrong; this logs a human-reviewable appeal. Never auto-changes the result.",
+          requestBody: {
+            required: true,
+            content: { "application/json": { schema: { $ref: "#/components/schemas/AppealInput" } } },
+          },
+          responses: {
+            "200": {
+              description: "Appeal received for review",
+              content: { "application/json": { schema: { $ref: "#/components/schemas/AppealReceived" } } },
+            },
+            "400": { description: "Missing question/reasoning or malformed email/URL" },
           },
         },
       },
@@ -545,6 +582,71 @@ export async function GET() {
               enum: ["pending", "approved", "rejected", "revisions-requested"],
             },
             reviewNotes: { type: "string", nullable: true },
+          },
+        },
+        ProposeInput: {
+          type: "object",
+          required: ["question", "category", "closesAt", "resolutionCriteria", "resolutionSources"],
+          properties: {
+            question: { type: "string", minLength: 10, maxLength: 280 },
+            questionEn: { type: "string" },
+            category: {
+              type: "string",
+              enum: [
+                "thai-politics",
+                "thai-climate",
+                "thai-vet",
+                "sea-elections",
+                "crypto",
+                "global-tech",
+                "global-sports",
+                "ai-research",
+              ],
+            },
+            closesAt: { type: "string", format: "date-time", description: "Must be in the future." },
+            resolutionCriteria: {
+              type: "string",
+              minLength: 40,
+              maxLength: 1000,
+              description: "Must contain a temporal/conditional anchor (if/when/before/after/on/by).",
+            },
+            resolutionSources: { type: "array", items: { type: "string" }, minItems: 1, maxItems: 5 },
+            tags: { type: "array", items: { type: "string" }, maxItems: 8 },
+            email: { type: "string", format: "email" },
+          },
+        },
+        ProposeAccepted: {
+          type: "object",
+          required: ["status", "draftId", "queueUrl", "reviewSlaHours", "message"],
+          properties: {
+            status: { type: "string", example: "pending_review" },
+            draftId: { type: "string" },
+            queueUrl: { type: "string", example: "/admin/proposals" },
+            reviewSlaHours: { type: "integer", example: 48 },
+            message: { type: "string" },
+          },
+        },
+        AppealInput: {
+          type: "object",
+          required: ["question", "reasoning"],
+          properties: {
+            identifier: { type: "string", description: "Market id/slug if appealing a known market." },
+            question: { type: "string" },
+            disputedStatus: { type: "string" },
+            disputedOutcome: { type: "string" },
+            reasoning: { type: "string", minLength: 10, description: "Why the result is wrong." },
+            evidenceUrl: { type: "string", format: "uri" },
+            email: { type: "string", format: "email" },
+          },
+        },
+        AppealReceived: {
+          type: "object",
+          required: ["status", "queued", "message", "reviewSlaHours"],
+          properties: {
+            status: { type: "string", example: "received" },
+            queued: { type: "boolean", example: true },
+            message: { type: "string" },
+            reviewSlaHours: { type: "integer", example: 72 },
           },
         },
         ProposalQueue: {
