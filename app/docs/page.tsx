@@ -7,7 +7,7 @@ import { BRAND, DEPLOY } from "@/lib/brand";
 
 export const metadata: Metadata = {
   title: "Developer docs · API + MCP",
-  description: `Developer reference for ${BRAND.name} — five MCP tools, nine public HTTP endpoints, copy-paste examples. No signup, no API key in Phase 0.`,
+  description: `Developer reference for ${BRAND.name} — six MCP tools, nine public HTTP endpoints, copy-paste examples. No signup, no API key in Phase 0.`,
 };
 
 const BASE = DEPLOY.baseUrl;
@@ -380,6 +380,31 @@ const mcpTools: McpTool[] = [
   "note": "string"
 }`,
   },
+  {
+    id: "cross-venue",
+    name: "foresight_cross_venue",
+    summary: "Compare Polymarket, Kalshi, and Manifold pricing.",
+    description:
+      "Look up how the major venues price a question — by Foresight market id/slug (auto-derives search terms) or by free-text query. Returns each venue's matching markets with YES probability, volume, liquidity. When all three return nothing, exclusiveToForesight is true: the topic is priced here and nowhere else — the niche the giants overlook. Read-only; data public + cached 1h. (v0.3.0+)",
+    inputShape: `{
+  "identifier"?: "string",  // market id or slug — auto-derives terms
+  "query"?: "string",       // free-text (when identifier omitted)
+  "terms"?: ["string"]      // optional AND-group keyword sets, e.g. ["bank,thailand","rate,cut"]
+}`,
+    outputShape: `{
+  "query": "string",
+  "exclusiveToForesight": false,
+  "totalMatches": 3,
+  "venues": {
+    "polymarket": [{ "question": "...", "yesProbability": 0.18, "volumeUsd": 0, "url": "..." }],
+    "kalshi": [/* same shape */],
+    "manifold": [/* same shape */]
+  },
+  "interpretation": "string  // plain-English read of the result",
+  "fetchedMs": 350,
+  "attribution": "string"
+}`,
+  },
 ];
 
 export default function DocsPage() {
@@ -409,7 +434,7 @@ export default function DocsPage() {
               Build forecasting into your agent.
             </h1>
             <p className="mt-5 max-w-2xl text-[var(--color-text-muted)] leading-[1.65]">
-              Five MCP tools, nine HTTP endpoints, zero auth in Phase 0. Every
+              Six MCP tools, nine HTTP endpoints, zero auth in Phase 0. Every
               endpoint mirrors the same data the web UI renders — no second
               source of truth to keep in sync. Copy any command below and run
               it locally.
@@ -522,7 +547,7 @@ export default function DocsPage() {
                   02 · MCP server
                 </p>
                 <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-white mb-4">
-                  Five tools, one server.
+                  Six tools, one server.
                 </h2>
                 <p className="text-sm text-white/70 leading-[1.7]">
                   Standalone Node package. Reads from the public{" "}

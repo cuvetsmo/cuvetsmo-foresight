@@ -21,6 +21,20 @@ interface Release {
 const releases: Release[] = [
   {
     date: "2026-05-27",
+    phase: "0.3.0 · MCP cross-venue tool",
+    title: "foresight_cross_venue — 6th MCP tool",
+    bullets: [
+      "The MCP package gains a 6th tool: foresight_cross_venue. Any AI agent can now query Polymarket + Kalshi + Manifold pricing for a market (by id/slug) or any free-text question — without holding three API integrations itself.",
+      "Returns each venue's matches, totalMatches, exclusiveToForesight, and a plain-English interpretation. exclusiveToForesight=true means we price what no major venue lists — the strategic core.",
+      "Defensive against API version drift: every venue array defaults to empty so an older deployed endpoint never crashes the tool. Verified live (350ms, graceful degrade).",
+      "Foresight becomes a forecasting-data hub, not just our own markets — the MCP-native protocol asymmetry in action.",
+    ],
+    knownLimits: [
+      "The Manifold column populates once the round 0.2.9 web deploy lands (queued behind a daily deploy cap). The tool already reads it defensively.",
+    ],
+  },
+  {
+    date: "2026-05-27",
     phase: "0.2.9 · open data sources",
     title: "Manifold Markets joins cross-venue lookup",
     bullets: [
