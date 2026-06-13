@@ -412,6 +412,19 @@ export async function GET() {
                 "Omitted when no providers are configured — see /api/resolve/status.",
             },
             refusalReason: { type: "string" },
+            crossVenueReference: {
+              type: "object",
+              nullable: true,
+              description:
+                "Present only for known-market (identifier-mode) resolves. Reference signal — what Polymarket/Kalshi/Manifold price the same question at. Does NOT influence the verifier's decision (criterion + named sources decide). null for ad-hoc resolves or when the lookup is unavailable.",
+              properties: {
+                exclusiveToForesight: { type: "boolean" },
+                polymarket: { type: "array", items: { $ref: "#/components/schemas/CrossVenueMatch" } },
+                kalshi: { type: "array", items: { $ref: "#/components/schemas/CrossVenueMatch" } },
+                manifold: { type: "array", items: { $ref: "#/components/schemas/CrossVenueMatch" } },
+                note: { type: "string" },
+              },
+            },
           },
         },
         ResolverStatus: {

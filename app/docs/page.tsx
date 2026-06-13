@@ -85,12 +85,14 @@ const apiSections: ApiSection[] = [
   "citedSources": [{ "source": "url", "checked": true, "note": "string" }],
   "appealAvailable": true,
   "providerUsed"?: "groq | cerebras | sambanova | openrouter | mistral",
-  "refusalReason"?: "string"
+  "refusalReason"?: "string",
+  "crossVenueReference"?: { /* known-market only — what other venues price this at */ }
 }`,
     notes: [
       "Confidence below 0.85 auto-downgrades status to ambiguous. The verifier never commits a low-confidence outcome.",
       "5-provider fallback chain (Groq → Cerebras → SambaNova → OpenRouter → Mistral). When none are configured the route returns status=pending with a transparent note; providerUsed is omitted in that case.",
       "12s abort timeout across the chain. proposedOutcome can also be 'void' when the resolver determines the market is unresolvable as-stated.",
+      "Identifier mode attaches crossVenueReference (Polymarket/Kalshi/Manifold prices for the same question) as a sanity signal — it does NOT influence the verdict; the criterion + named sources decide.",
     ],
   },
   {
